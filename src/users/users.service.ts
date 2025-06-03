@@ -18,11 +18,12 @@ export class UsersService {
     }
 
     const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
-    
+
     const user = await this.prisma.user.create({
       data: {
         ...createUserDto,
         password: hashedPassword,
+        role: 'ADMIN',
       },
     });
 
@@ -69,4 +70,4 @@ export class UsersService {
       where: { email },
     });
   }
-} 
+}

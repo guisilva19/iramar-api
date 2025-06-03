@@ -20,16 +20,16 @@ export class AuthController {
           id: '123e4567-e89b-12d3-a456-426614174000',
           email: 'admin@example.com',
           name: 'Admin',
-          role: 'ADMIN'
-        }
-      }
-    }
+          role: 'ADMIN',
+        },
+      },
+    },
   })
   @ApiResponse({
     status: 401,
-    description: 'Credenciais inválidas ou usuário não é administrador'
+    description: 'Credenciais inválidas ou usuário não é administrador',
   })
   async login(@Body() loginDto: LoginDto) {
     return this.authService.login(loginDto);
   }
-} 
+}

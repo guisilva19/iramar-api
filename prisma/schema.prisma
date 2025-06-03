@@ -19,7 +19,7 @@ model User {
   email         String    @unique
   name          String?
   password      String
-  role          Role      @default(CUSTOMER)
+  role          Role      @default(ADMIN)
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
   orders        Order[]

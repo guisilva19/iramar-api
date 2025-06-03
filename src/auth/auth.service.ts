@@ -28,7 +28,9 @@ export class AuthService {
     }
 
     if (user.role !== 'ADMIN') {
-      throw new UnauthorizedException('Only administrators can access this resource');
+      throw new UnauthorizedException(
+        'Only administrators can access this resource',
+      );
     }
 
     const payload = { sub: user.id, email: user.email, role: user.role };
@@ -43,4 +45,4 @@ export class AuthService {
       },
     };
   }
-} 
+}
