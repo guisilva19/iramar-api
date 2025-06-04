@@ -27,12 +27,6 @@ export class AuthService {
       throw new UnauthorizedException('Invalid credentials');
     }
 
-    if (user.role !== 'ADMIN') {
-      throw new UnauthorizedException(
-        'Only administrators can access this resource',
-      );
-    }
-
     const payload = { sub: user.id, email: user.email, role: user.role };
 
     return {

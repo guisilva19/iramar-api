@@ -15,29 +15,28 @@ datasource db {
 
 // Add your models here
 model User {
-  id            String    @id @default(uuid())
-  email         String    @unique
-  name          String?
-  password      String
-  role          Role      @default(ADMIN)
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-  orders        Order[]
-  addresses     Address[]
-  cart          Cart?
+  id        String    @id @default(uuid())
+  email     String    @unique
+  name      String?
+  password  String
+  role      Role      @default(ADMIN)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  orders    Order[]
+  addresses Address[]
+  cart      Cart?
 }
 
 model Product {
-  id          String        @id @default(uuid())
+  id          String         @id @default(uuid())
   name        String
   description String
   price       Float
   stock       Int
-  sku         String        @unique
   images      ProductImage[]
-  createdAt   DateTime      @default(now())
-  updatedAt   DateTime      @updatedAt
-  category    Category      @relation(fields: [categoryId], references: [id])
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+  category    Category       @relation(fields: [categoryId], references: [id])
   categoryId  String
   orderItems  OrderItem[]
   cartItems   CartItem[]
