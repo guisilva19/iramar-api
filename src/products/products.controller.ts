@@ -54,7 +54,6 @@ export class ProductsController {
           description:
             'Arroz integral tipo 1, pacote de 1kg. Rico em fibras e nutrientes essenciais.',
           price: 8.99,
-          stock: 100,
           categoryId: '123e4567-e89b-12d3-a456-426614174000',
         },
       },
@@ -64,7 +63,6 @@ export class ProductsController {
           name: 'Feijão Carioca',
           description: 'Feijão carioca de primeira qualidade, pacote de 1kg.',
           price: 7.99,
-          stock: 150,
           categoryId: '123e4567-e89b-12d3-a456-426614174000',
         },
       },
@@ -168,12 +166,6 @@ export class ProductsController {
         summary: 'Atualizar Preço',
         value: {
           price: 9.99,
-        },
-      },
-      atualizarEstoque: {
-        summary: 'Atualizar Estoque',
-        value: {
-          stock: 200,
         },
       },
     },

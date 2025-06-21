@@ -32,29 +32,18 @@ model Product {
   name        String
   description String
   price       Float
-  stock       Int
-  images      ProductImage[]
+  image       String?
   createdAt   DateTime       @default(now())
   updatedAt   DateTime       @updatedAt
-  category    Category       @relation(fields: [categoryId], references: [id])
-  categoryId  String
+  category    Category?      @relation(fields: [categoryId], references: [id])
+  categoryId  String?
   orderItems  OrderItem[]
   cartItems   CartItem[]
-}
-
-model ProductImage {
-  id        String   @id @default(uuid())
-  url       String
-  product   Product  @relation(fields: [productId], references: [id])
-  productId String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
 }
 
 model Category {
   id          String    @id @default(uuid())
   name        String    @unique
-  description String?
   products    Product[]
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt

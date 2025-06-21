@@ -11,7 +11,6 @@ export class ProductsService {
       data: createProductDto,
       include: {
         category: true,
-        images: true,
       },
     });
   }
@@ -20,7 +19,6 @@ export class ProductsService {
     return this.prisma.product.findMany({
       include: {
         category: true,
-        images: true,
       },
     });
   }
@@ -30,7 +28,6 @@ export class ProductsService {
       where: { id },
       include: {
         category: true,
-        images: true,
       },
     });
 
@@ -48,7 +45,6 @@ export class ProductsService {
         data: updateProductDto,
         include: {
           category: true,
-          images: true,
         },
       });
     } catch (error) {

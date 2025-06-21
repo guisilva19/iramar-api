@@ -4,6 +4,7 @@ import {
   IsPositive,
   IsNotEmpty,
   IsUUID,
+  IsOptional,
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
@@ -14,7 +15,6 @@ import { ApiProperty } from '@nestjs/swagger';
  *   "name": "Arroz Integral Tipo 1",
  *   "description": "Arroz integral tipo 1, pacote de 1kg. Rico em fibras e nutrientes essenciais.",
  *   "price": 8.99,
- *   "stock": 100,
  *   "categoryId": "123e4567-e89b-12d3-a456-426614174000"
  * }
  */
@@ -62,28 +62,15 @@ export class CreateProductDto {
   price: number;
 
   @ApiProperty({
-    example: 100,
-    description: 'Quantidade disponível em estoque (unidades)',
-    default: 100,
-    minimum: 0,
-    required: true,
-    type: Number,
-    format: 'int32',
-  })
-  @IsNumber()
-  @IsPositive()
-  stock: number;
-
-  @ApiProperty({
     example: '123e4567-e89b-12d3-a456-426614174000',
     description:
       'ID da categoria do produto (ex: Alimentos, Bebidas, Higiene, etc). Deve ser um UUID válido de uma categoria existente.',
     default: '123e4567-e89b-12d3-a456-426614174000',
-    required: true,
+    required: false,
     format: 'uuid',
     type: String,
   })
   @IsUUID()
-  @IsNotEmpty()
-  categoryId: string;
+  @IsOptional()
+  categoryId?: string;
 }
