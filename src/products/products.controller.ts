@@ -7,9 +7,13 @@ import {
   Param,
   Delete,
   UseGuards,
+  Query,
 } from '@nestjs/common';
 import { ProductsService } from './products.service';
 import { CreateProductDto } from './dto/create-product.dto';
+import { FindAllProductsDto } from './dto/find-all-products.dto';
+import { PaginatedProductsResponseDto } from './dto/paginated-products-response.dto';
+import { ProductResponseDto } from './dto/product-response.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
@@ -21,6 +25,7 @@ import {
   ApiBearerAuth,
   ApiBody,
   ApiParam,
+  ApiQuery,
 } from '@nestjs/swagger';
 
 /**
@@ -94,21 +99,50 @@ export class ProductsController {
 
   /**
    * Lista todos os produtos
-   * @description Retorna uma lista com todos os produtos cadastrados
+   * @description Retorna uma lista paginada de produtos com opções de filtro por categoria e busca
    */
   @Get()
   @ApiOperation({
-    summary: 'Listar todos os produtos',
+    summary: 'Listar produtos com filtros e paginação',
     description:
-      'Retorna uma lista paginada de todos os produtos cadastrados no sistema.',
+      'Retorna uma lista paginada de produtos com opções de filtro por categoria, busca por texto e paginação. Apenas page e limit são obrigatórios.',
+  })
+  @ApiQuery({
+    name: 'page',
+    required: true,
+    description: 'Número da página (começa em 1)',
+    example: 1,
+    type: 'number',
+  })
+  @ApiQuery({
+    name: 'limit',
+    required: true,
+    description: 'Número de itens por página (máximo 20)',
+    example: 10,
+    type: 'number',
+  })
+  @ApiQuery({
+    name: 'categoryId',
+    required: false,
+    description: 'ID da categoria para filtrar produtos (opcional)',
+    example: '123e4567-e89b-12d3-a456-426614174000',
+    type: 'string',
+    format: 'uuid',
+  })
+  @ApiQuery({
+    name: 'search',
+    required: false,
+    description: 'Termo de busca para filtrar produtos por nome ou descrição (opcional)',
+    example: 'arroz',
+    type: 'string',
   })
   @ApiResponse({
     status: 200,
     description: 'Lista de produtos retornada com sucesso.',
-    type: [CreateProductDto],
+    type: PaginatedProductsResponseDto,
   })
-  findAll() {
-    return this.productsService.findAll();
+  findAll(@Query() query: FindAllProductsDto) {
+    return this.productsService.findAll(query);
   }
 
   /**
@@ -130,7 +164,7 @@ export class ProductsController {
   @ApiResponse({
     status: 200,
     description: 'Produto encontrado com sucesso.',
-    type: CreateProductDto,
+    type: ProductResponseDto,
   })
   @ApiResponse({
     status: 404,
