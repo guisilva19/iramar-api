@@ -6,7 +6,7 @@ export class UpdateOrderStatusDto {
   @ApiProperty({
     description: 'Novo status do pedido',
     enum: OrderStatus,
-    example: OrderStatus.PROCESSING
+    example: OrderStatus.EM_ANDAMENTO
   })
   @IsEnum(OrderStatus)
   status: OrderStatus;

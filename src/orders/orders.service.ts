@@ -180,13 +180,13 @@ export class OrdersService {
       throw new NotFoundException('Order not found');
     }
 
-    if (order.status !== OrderStatus.PENDING) {
+    if (order.status !== OrderStatus.PENDENTE) {
       throw new BadRequestException('Order cannot be cancelled');
     }
 
     const updatedOrder = await this.prisma.order.update({
       where: { id: orderId },
-      data: { status: OrderStatus.CANCELLED },
+      data: { status: OrderStatus.CANCELADO },
       include: {
         items: {
           include: {
@@ -312,11 +312,11 @@ export class OrdersService {
 
   private isValidStatusTransition(currentStatus: OrderStatus, newStatus: OrderStatus): boolean {
     const validTransitions: Record<OrderStatus, OrderStatus[]> = {
-      [OrderStatus.PENDING]: [OrderStatus.PROCESSING, OrderStatus.CANCELLED],
-      [OrderStatus.PROCESSING]: [OrderStatus.SHIPPED, OrderStatus.CANCELLED],
-      [OrderStatus.SHIPPED]: [OrderStatus.DELIVERED],
-      [OrderStatus.DELIVERED]: [],
-      [OrderStatus.CANCELLED]: [],
+      [OrderStatus.PENDENTE]: [OrderStatus.EM_ANDAMENTO, OrderStatus.CANCELADO],
+      [OrderStatus.EM_ANDAMENTO]: [OrderStatus.ENVIADO, OrderStatus.CANCELADO],
+      [OrderStatus.ENVIADO]: [OrderStatus.ENTREGUE],
+      [OrderStatus.ENTREGUE]: [],
+      [OrderStatus.CANCELADO]: [],
     };
 
     return validTransitions[currentStatus].includes(newStatus);

@@ -30,7 +30,7 @@ export class OrdersController {
 
   // Customer routes (agora ADMIN também pode acessar)
   @Post()
-  @Roles(Role.CUSTOMER, Role.ADMIN)
+  @Roles(Role.ADMIN)
   @ApiOperation({ summary: 'Criar novo pedido' })
   @ApiResponse({ status: 201, description: 'Pedido criado com sucesso', type: OrderResponseDto })
   @ApiResponse({ status: 401, description: 'Token JWT inválido ou ausente' })
@@ -45,7 +45,7 @@ export class OrdersController {
   }
 
   @Get()
-  @Roles(Role.CUSTOMER, Role.ADMIN)
+  @Roles(Role.ADMIN)
   @ApiOperation({ summary: 'Listar pedidos do usuário' })
   @ApiQuery({ name: 'page', required: false, type: Number })
   @ApiQuery({ name: 'limit', required: false, type: Number })
@@ -61,7 +61,7 @@ export class OrdersController {
   }
 
   @Get(':id')
-  @Roles(Role.CUSTOMER, Role.ADMIN)
+  @Roles(Role.ADMIN)
   @ApiOperation({ summary: 'Obter pedido por ID' })
   @ApiParam({ name: 'id', description: 'ID do pedido' })
   @ApiResponse({ status: 200, description: 'Pedido obtido com sucesso', type: OrderResponseDto })
@@ -76,7 +76,7 @@ export class OrdersController {
   }
 
   @Put(':id/status')
-  @Roles(Role.CUSTOMER, Role.ADMIN)
+  @Roles(Role.ADMIN)
   @ApiOperation({ summary: 'Atualizar status do pedido' })
   @ApiParam({ name: 'id', description: 'ID do pedido' })
   @ApiResponse({ status: 200, description: 'Status atualizado com sucesso', type: OrderResponseDto })
@@ -93,7 +93,7 @@ export class OrdersController {
   }
 
   @Put(':id/cancel')
-  @Roles(Role.CUSTOMER, Role.ADMIN)
+  @Roles(Role.ADMIN)
   @ApiOperation({ summary: 'Cancelar pedido' })
   @ApiParam({ name: 'id', description: 'ID do pedido' })
   @ApiResponse({ status: 200, description: 'Pedido cancelado com sucesso', type: OrderResponseDto })

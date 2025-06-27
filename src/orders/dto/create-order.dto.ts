@@ -13,7 +13,7 @@ export class CreateOrderDto {
   @ApiProperty({
     description: 'Método de pagamento',
     enum: PaymentMethod,
-    example: PaymentMethod.CREDIT_CARD
+    example: PaymentMethod.CARTAO_CREDITO
   })
   @IsEnum(PaymentMethod)
   paymentMethod: PaymentMethod;

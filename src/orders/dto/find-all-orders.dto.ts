@@ -28,7 +28,7 @@ export class FindAllOrdersDto {
   @ApiPropertyOptional({
     description: 'Filtrar por status',
     enum: OrderStatus,
-    example: OrderStatus.PENDING
+    example: OrderStatus.PENDENTE
   })
   @IsOptional()
   @IsEnum(OrderStatus)

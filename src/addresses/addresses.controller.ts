@@ -23,7 +23,7 @@ import { Role } from '@prisma/client';
 @ApiBearerAuth()
 @Controller('addresses')
 @UseGuards(JwtAuthGuard, RolesGuard)
-@Roles(Role.CUSTOMER, Role.ADMIN)
+@Roles(Role.ADMIN)
 export class AddressesController {
   constructor(private readonly addressesService: AddressesService) {}
 

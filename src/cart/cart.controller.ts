@@ -23,7 +23,7 @@ import { Role } from '@prisma/client';
 @ApiBearerAuth()
 @Controller('cart')
 @UseGuards(JwtAuthGuard, RolesGuard)
-@Roles(Role.CUSTOMER, Role.ADMIN)
+@Roles(Role.ADMIN)
 export class CartController {
   constructor(private readonly cartService: CartService) {}
 
