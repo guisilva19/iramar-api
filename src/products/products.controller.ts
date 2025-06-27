@@ -8,7 +8,13 @@ import {
   Delete,
   UseGuards,
   Query,
+  UseInterceptors,
+  UploadedFile,
+  ParseFilePipe,
+  MaxFileSizeValidator,
+  FileTypeValidator,
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { ProductsService } from './products.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { FindAllProductsDto } from './dto/find-all-products.dto';
@@ -26,6 +32,7 @@ import {
   ApiBody,
   ApiParam,
   ApiQuery,
+  ApiConsumes,
 } from '@nestjs/swagger';
 
 /**
@@ -95,6 +102,66 @@ export class ProductsController {
   @Roles(Role.ADMIN)
   create(@Body() createProductDto: CreateProductDto) {
     return this.productsService.create(createProductDto);
+  }
+
+  /**
+   * Upload de arquivo para produto
+   * @description Endpoint para fazer upload de imagem de produto via FormData
+   */
+  @Post('upload')
+  @ApiBearerAuth()
+  @ApiConsumes('multipart/form-data')
+  @ApiOperation({
+    summary: 'Upload de imagem de produto',
+    description:
+      'Faz upload de uma imagem para um produto. Requer autenticação e permissão de administrador. Aceita FormData com arquivo e dados opcionais do produto.',
+  })
+  @ApiBody({
+    description: 'FormData com arquivo de imagem',
+    schema: {
+      type: 'object',
+      properties: {
+        file: {
+          type: 'string',
+          format: 'binary',
+          description: 'Arquivo de imagem (jpg, jpeg, png, gif) - máximo 2MB',
+        },
+      },
+      required: ['file'],
+    },
+  })
+  @ApiResponse({
+    status: 201,
+    description: 'Arquivo enviado com sucesso.',
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Dados inválidos fornecidos ou arquivo inválido.',
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Não autorizado. Token de acesso inválido ou ausente.',
+  })
+  @ApiResponse({
+    status: 403,
+    description:
+      'Acesso negado. Usuário não possui permissão de administrador.',
+  })
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
+  @UseInterceptors(FileInterceptor('file'))
+  async uploadFile(
+    @UploadedFile(
+      new ParseFilePipe({
+        validators: [
+          new MaxFileSizeValidator({ maxSize: 2 * 1024 * 1024 }), // 2MB
+          new FileTypeValidator({ fileType: '.(jpg|jpeg|png|gif)' }),
+        ],
+      }),
+    )
+    file: Express.Multer.File,
+  ) {
+    return this.productsService.uploadFile(file);
   }
 
   /**

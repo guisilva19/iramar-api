@@ -4,10 +4,22 @@ import { CreateProductDto } from './dto/create-product.dto';
 import { FindAllProductsDto } from './dto/find-all-products.dto';
 import { PaginatedProductsResponseDto } from './dto/paginated-products-response.dto';
 import { ProductResponseDto } from './dto/product-response.dto';
+import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
+import 'dotenv/config';
 
 @Injectable()
 export class ProductsService {
-  constructor(private prisma: PrismaService) {}
+  private s3: S3Client;
+
+  constructor(private prisma: PrismaService) {
+    this.s3 = new S3Client({
+      region: process.env.S3_REGION,
+      credentials: {
+        accessKeyId: `${process.env.AWS_ACCESS_KEY_ID}`,
+        secretAccessKey: `${process.env.AWS_SECRET_ACCESS_KEY}`,
+      }
+    });
+  }
 
   async create(createProductDto: CreateProductDto): Promise<ProductResponseDto> {
     return this.prisma.product.create({
@@ -114,5 +126,21 @@ export class ProductsService {
     } catch (error) {
       throw new NotFoundException(`Product with ID ${id} not found`);
     }
+  }
+
+  async uploadFile(
+    file: Express.Multer.File,
+  ) {
+   
+    const params = {
+      Bucket: process.env.S3_BUCKET_NAME,
+      Key: file.originalname,
+      Body: file.buffer,
+    };
+
+    const command = new PutObjectCommand(params);
+    await this.s3.send(command);
+
+   return { url: `https://${process.env.S3_BUCKET_NAME}.s3.${process.env.S3_REGION}.amazonaws.com/${file.originalname}` }
   }
 }

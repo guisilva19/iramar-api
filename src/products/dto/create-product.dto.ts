@@ -73,4 +73,14 @@ export class CreateProductDto {
   @IsUUID()
   @IsOptional()
   categoryId?: string;
+
+  @ApiProperty({
+    example: 'https://example.com/image.jpg',
+    description: 'URL da imagem do produto',
+    type: String,
+    required: false,
+  })
+  @IsString()
+  @IsOptional()
+  image?: string;
 }
