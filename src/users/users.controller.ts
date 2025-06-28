@@ -15,13 +15,11 @@ import { Role } from '@prisma/client';
 
 @ApiTags('Usuários')
 @Controller('users')
-@UseGuards(JwtAuthGuard, RolesGuard)
 @ApiBearerAuth()
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @Post()
-  @Roles(Role.ADMIN)
   @ApiOperation({ summary: 'Criar um novo usuário' })
   @ApiResponse({ status: 201, description: 'User successfully created.' })
   @ApiResponse({ status: 400, description: 'Bad request.' })
@@ -30,14 +28,16 @@ export class UsersController {
   }
 
   @Get()
-  @Roles(Role.ADMIN)
   @ApiOperation({ summary: 'Listar todos os usuários' })
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
   @ApiResponse({ status: 200, description: 'Return all users.' })
   findAll() {
     return this.usersService.findAll();
   }
 
   @Get(':id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN)
   @ApiOperation({ summary: 'Obter um usuário por ID' })
   @ApiParam({ name: 'id', description: 'User ID (UUID)' })
