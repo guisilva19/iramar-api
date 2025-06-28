@@ -16,4 +16,26 @@ export class PaginatedOrdersResponseDto {
 
   @ApiProperty()
   totalPages: number;
+}
+
+export class OrderStatusStatsDto {
+  @ApiProperty()
+  PENDENTE: number;
+
+  @ApiProperty()
+  EM_ANDAMENTO: number;
+
+  @ApiProperty()
+  ENVIADO: number;
+
+  @ApiProperty()
+  ENTREGUE: number;
+
+  @ApiProperty()
+  CANCELADO: number;
+}
+
+export class AdminPaginatedOrdersResponseDto extends PaginatedOrdersResponseDto {
+  @ApiProperty({ type: OrderStatusStatsDto })
+  stats: OrderStatusStatsDto;
 } 

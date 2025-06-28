@@ -37,11 +37,9 @@ export class FindAllProductsDto {
     example: 10,
     default: 10,
     minimum: 1,
-    maximum: 20,
   })
   @Type(() => Number)
   @IsInt()
   @Min(1)
-  @Max(20)
   limit: number = 10;
 } 

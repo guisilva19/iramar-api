@@ -15,7 +15,7 @@ import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderStatusDto } from './dto/update-order-status.dto';
 import { FindAllOrdersDto } from './dto/find-all-orders.dto';
 import { OrderResponseDto } from './dto/order-response.dto';
-import { PaginatedOrdersResponseDto } from './dto/paginated-orders-response.dto';
+import { PaginatedOrdersResponseDto, AdminPaginatedOrdersResponseDto } from './dto/paginated-orders-response.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
@@ -49,7 +49,7 @@ export class OrdersController {
   @ApiOperation({ summary: 'Listar pedidos do usuário' })
   @ApiQuery({ name: 'page', required: false, type: Number })
   @ApiQuery({ name: 'limit', required: false, type: Number })
-  @ApiQuery({ name: 'status', required: false, enum: ['PENDING', 'PROCESSING', 'SHIPPED', 'DELIVERED', 'CANCELLED'] })
+  @ApiQuery({ name: 'status', required: false, enum: ['PENDENTE', 'EM_ANDAMENTO', 'ENVIADO', 'ENTREGUE', 'CANCELADO'] })
   @ApiResponse({ status: 200, description: 'Pedidos listados com sucesso', type: PaginatedOrdersResponseDto })
   @ApiResponse({ status: 401, description: 'Token JWT inválido ou ausente' })
   @ApiResponse({ status: 403, description: 'Usuário não tem permissão (apenas CUSTOMER e ADMIN podem acessar)' })
@@ -114,13 +114,13 @@ export class OrdersController {
   @ApiOperation({ summary: 'Listar todos os pedidos (Admin)' })
   @ApiQuery({ name: 'page', required: false, type: Number })
   @ApiQuery({ name: 'limit', required: false, type: Number })
-  @ApiQuery({ name: 'status', required: false, enum: ['PENDING', 'PROCESSING', 'SHIPPED', 'DELIVERED', 'CANCELLED'] })
-  @ApiResponse({ status: 200, description: 'Pedidos listados com sucesso', type: PaginatedOrdersResponseDto })
+  @ApiQuery({ name: 'status', required: false, enum: ['PENDENTE', 'EM_ANDAMENTO', 'ENVIADO', 'ENTREGUE', 'CANCELADO'] })
+  @ApiResponse({ status: 200, description: 'Pedidos listados com sucesso', type: AdminPaginatedOrdersResponseDto })
   @ApiResponse({ status: 401, description: 'Token JWT inválido ou ausente' })
   @ApiResponse({ status: 403, description: 'Usuário não tem permissão (apenas ADMIN pode acessar)' })
   async findAllOrdersAdmin(
     @Query() query: FindAllOrdersDto,
-  ): Promise<PaginatedOrdersResponseDto> {
+  ): Promise<AdminPaginatedOrdersResponseDto> {
     return this.ordersService.findAllOrdersAdmin(query);
   }
 

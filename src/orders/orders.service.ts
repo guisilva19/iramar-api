@@ -5,7 +5,7 @@ import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderStatusDto } from './dto/update-order-status.dto';
 import { FindAllOrdersDto } from './dto/find-all-orders.dto';
 import { OrderResponseDto, OrderItemResponseDto, AddressResponseDto } from './dto/order-response.dto';
-import { PaginatedOrdersResponseDto } from './dto/paginated-orders-response.dto';
+import { PaginatedOrdersResponseDto, AdminPaginatedOrdersResponseDto } from './dto/paginated-orders-response.dto';
 import { OrderStatus } from '@prisma/client';
 
 @Injectable()
@@ -201,7 +201,7 @@ export class OrdersService {
   }
 
   // Admin methods
-  async findAllOrdersAdmin(query: FindAllOrdersDto): Promise<PaginatedOrdersResponseDto> {
+  async findAllOrdersAdmin(query: FindAllOrdersDto): Promise<AdminPaginatedOrdersResponseDto> {
     const { page = 1, limit = 10, status } = query;
     const skip = (page - 1) * limit;
 
@@ -209,7 +209,7 @@ export class OrdersService {
       ...(status && { status }),
     };
 
-    const [orders, total] = await Promise.all([
+    const [orders, total, stats] = await Promise.all([
       this.prisma.order.findMany({
         where,
         include: {
@@ -232,6 +232,7 @@ export class OrdersService {
         take: limit,
       }),
       this.prisma.order.count({ where }),
+      this.getOrderStats(),
     ]);
 
     const totalPages = Math.ceil(total / limit);
@@ -242,7 +243,31 @@ export class OrdersService {
       page,
       limit,
       totalPages,
+      stats,
     };
+  }
+
+  private async getOrderStats() {
+    const stats = await this.prisma.order.groupBy({
+      by: ['status'],
+      _count: {
+        status: true,
+      },
+    });
+
+    const statsMap = {
+      PENDENTE: 0,
+      EM_ANDAMENTO: 0,
+      ENVIADO: 0,
+      ENTREGUE: 0,
+      CANCELADO: 0,
+    };
+
+    stats.forEach(stat => {
+      statsMap[stat.status] = stat._count.status;
+    });
+
+    return statsMap;
   }
 
   async updateOrderStatusAdmin(
