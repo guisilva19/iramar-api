@@ -33,6 +33,7 @@ model Product {
   description String
   price       Float
   image       String?
+  isActive    Boolean        @default(true)
   createdAt   DateTime       @default(now())
   updatedAt   DateTime       @updatedAt
   category    Category?      @relation(fields: [categoryId], references: [id])

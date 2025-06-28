@@ -7,6 +7,7 @@ import { CategoriesModule } from './categories/categories.module';
 import { CartModule } from './cart/cart.module';
 import { OrdersModule } from './orders/orders.module';
 import { AddressesModule } from './addresses/addresses.module';
+import { DashboardModule } from './dashboard/dashboard.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { AddressesModule } from './addresses/addresses.module';
     CartModule,
     OrdersModule,
     AddressesModule,
+    DashboardModule,
   ],
   controllers: [],
   providers: [],
