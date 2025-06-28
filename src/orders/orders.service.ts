@@ -4,7 +4,7 @@ import { CartService } from '../cart/cart.service';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderStatusDto } from './dto/update-order-status.dto';
 import { FindAllOrdersDto } from './dto/find-all-orders.dto';
-import { OrderResponseDto, OrderItemResponseDto, AddressResponseDto } from './dto/order-response.dto';
+import { OrderResponseDto, OrderItemResponseDto, OrderAddressResponseDto } from './dto/order-response.dto';
 import { PaginatedOrdersResponseDto, AdminPaginatedOrdersResponseDto } from './dto/paginated-orders-response.dto';
 import { OrderStatus } from '@prisma/client';
 
@@ -311,7 +311,7 @@ export class OrdersService {
       subtotal: item.price * item.quantity,
     }));
 
-    const address: AddressResponseDto = {
+    const address: OrderAddressResponseDto = {
       id: order.address.id,
       street: order.address.street,
       number: order.address.number,

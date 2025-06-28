@@ -24,7 +24,7 @@ export class OrderItemResponseDto {
   subtotal: number;
 }
 
-export class AddressResponseDto {
+export class OrderAddressResponseDto {
   @ApiProperty()
   id: string;
 
@@ -66,8 +66,8 @@ export class OrderResponseDto {
   @ApiProperty({ type: [OrderItemResponseDto] })
   items: OrderItemResponseDto[];
 
-  @ApiProperty({ type: AddressResponseDto })
-  address: AddressResponseDto;
+  @ApiProperty({ type: OrderAddressResponseDto })
+  address: OrderAddressResponseDto;
 
   @ApiProperty({ enum: PaymentMethod })
   paymentMethod: PaymentMethod;
