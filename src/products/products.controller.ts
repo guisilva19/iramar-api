@@ -20,6 +20,7 @@ import { CreateProductDto } from './dto/create-product.dto';
 import { FindAllProductsDto } from './dto/find-all-products.dto';
 import { PaginatedProductsResponseDto } from './dto/paginated-products-response.dto';
 import { ProductResponseDto } from './dto/product-response.dto';
+import { EcommerceProductsDto, FeaturedProductsDto, SortOrder } from './dto/ecommerce-products.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
@@ -208,8 +209,235 @@ export class ProductsController {
     description: 'Lista de produtos retornada com sucesso.',
     type: PaginatedProductsResponseDto,
   })
+  @ApiResponse({
+    status: 400,
+    description: 'Dados inválidos fornecidos.',
+  })
   findAll(@Query() query: FindAllProductsDto) {
     return this.productsService.findAll(query);
+  }
+
+  /**
+   * Lista produtos para o e-commerce
+   * @description Retorna produtos para o e-commerce com ordenação aleatória por padrão e filtros
+   */
+  @Get('ecommerce')
+  @ApiOperation({
+    summary: 'Listar produtos para e-commerce',
+    description:
+      'Retorna produtos para o e-commerce com ordenação aleatória por padrão, filtros e paginação. Ideal para páginas de listagem de produtos.',
+  })
+  @ApiQuery({
+    name: 'page',
+    required: false,
+    description: 'Número da página (começa em 1)',
+    example: 1,
+    type: 'number',
+  })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    description: 'Número de itens por página (máximo 50)',
+    example: 20,
+    type: 'number',
+  })
+  @ApiQuery({
+    name: 'categoryId',
+    required: false,
+    description: 'ID da categoria para filtrar produtos (opcional)',
+    example: '123e4567-e89b-12d3-a456-426614174000',
+    type: 'string',
+    format: 'uuid',
+  })
+  @ApiQuery({
+    name: 'search',
+    required: false,
+    description: 'Termo de busca para filtrar produtos por nome ou descrição (pode ser vazio)',
+    example: 'arroz',
+    type: 'string',
+  })
+  @ApiQuery({
+    name: 'sortBy',
+    required: false,
+    description: 'Ordenação dos produtos (aleatória por padrão)',
+    enum: SortOrder,
+    example: SortOrder.RANDOM,
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Produtos retornados com sucesso.',
+    type: PaginatedProductsResponseDto,
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Dados inválidos fornecidos.',
+  })
+  findEcommerceProducts(@Query() query: EcommerceProductsDto) {
+    return this.productsService.findEcommerceProducts(query);
+  }
+
+  /**
+   * Lista produtos em destaque para o e-commerce
+   * @description Retorna produtos em destaque com ordenação aleatória para exibição na página inicial
+   */
+  @Get('featured')
+  @ApiOperation({
+    summary: 'Listar produtos em destaque',
+    description:
+      'Retorna produtos em destaque com ordenação aleatória para exibição na página inicial do e-commerce. Ideal para banners e seções de destaque.',
+  })
+  @ApiQuery({
+    name: 'categoryId',
+    required: false,
+    description: 'ID da categoria para filtrar produtos em destaque (opcional)',
+    example: '123e4567-e89b-12d3-a456-426614174000',
+    type: 'string',
+    format: 'uuid',
+  })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    description: 'Número de produtos em destaque a retornar',
+    example: 10,
+    type: 'number',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Produtos em destaque retornados com sucesso.',
+    type: [ProductResponseDto],
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Dados inválidos fornecidos.',
+  })
+  findFeaturedProducts(@Query() query: FeaturedProductsDto) {
+    return this.productsService.findFeaturedProducts(query);
+  }
+
+  /**
+   * Lista produtos por categoria para o e-commerce
+   * @description Retorna produtos de uma categoria específica com ordenação aleatória por padrão
+   */
+  @Get('category/:categoryId')
+  @ApiOperation({
+    summary: 'Listar produtos por categoria',
+    description:
+      'Retorna produtos de uma categoria específica com ordenação aleatória por padrão e filtros. Ideal para páginas de categoria.',
+  })
+  @ApiParam({
+    name: 'categoryId',
+    description: 'ID da categoria',
+    example: '123e4567-e89b-12d3-a456-426614174000',
+    type: 'string',
+    format: 'uuid',
+  })
+  @ApiQuery({
+    name: 'page',
+    required: false,
+    description: 'Número da página (começa em 1)',
+    example: 1,
+    type: 'number',
+  })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    description: 'Número de itens por página (máximo 50)',
+    example: 20,
+    type: 'number',
+  })
+  @ApiQuery({
+    name: 'search',
+    required: false,
+    description: 'Termo de busca para filtrar produtos por nome ou descrição (pode ser vazio)',
+    example: 'arroz',
+    type: 'string',
+  })
+  @ApiQuery({
+    name: 'sortBy',
+    required: false,
+    description: 'Ordenação dos produtos (aleatória por padrão)',
+    enum: SortOrder,
+    example: SortOrder.RANDOM,
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Produtos da categoria retornados com sucesso.',
+    type: PaginatedProductsResponseDto,
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Dados inválidos fornecidos.',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Categoria não encontrada.',
+  })
+  findProductsByCategory(
+    @Param('categoryId') categoryId: string,
+    @Query() query: EcommerceProductsDto,
+  ) {
+    return this.productsService.findProductsByCategory(categoryId, query);
+  }
+
+  /**
+   * Busca produtos por termo de busca para o e-commerce
+   * @description Retorna produtos que correspondem ao termo de busca com ordenação aleatória por padrão
+   */
+  @Get('search/:search')
+  @ApiOperation({
+    summary: 'Buscar produtos por termo',
+    description:
+      'Retorna produtos que correspondem ao termo de busca com ordenação aleatória por padrão e filtros. Busca por nome e descrição.',
+  })
+  @ApiParam({
+    name: 'search',
+    description: 'Termo de busca',
+    example: 'arroz',
+    type: 'string',
+  })
+  @ApiQuery({
+    name: 'page',
+    required: false,
+    description: 'Número da página (começa em 1)',
+    example: 1,
+    type: 'number',
+  })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    description: 'Número de itens por página (máximo 50)',
+    example: 20,
+    type: 'number',
+  })
+  @ApiQuery({
+    name: 'categoryId',
+    required: false,
+    description: 'ID da categoria para filtrar produtos (opcional)',
+    example: '123e4567-e89b-12d3-a456-426614174000',
+    type: 'string',
+    format: 'uuid',
+  })
+  @ApiQuery({
+    name: 'sortBy',
+    required: false,
+    description: 'Ordenação dos produtos (aleatória por padrão)',
+    enum: SortOrder,
+    example: SortOrder.RANDOM,
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Produtos encontrados retornados com sucesso.',
+    type: PaginatedProductsResponseDto,
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Dados inválidos fornecidos.',
+  })
+  searchProducts(
+    @Param('search') search: string,
+    @Query() query: EcommerceProductsDto,
+  ) {
+    return this.productsService.searchProducts(search, query);
   }
 
   /**
