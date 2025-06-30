@@ -8,6 +8,7 @@ import {
   Param,
   UseGuards,
   Request,
+  Query,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiParam, ApiBody } from '@nestjs/swagger';
 import { AddressesService } from './addresses.service';
@@ -144,22 +145,21 @@ export class AddressesController {
   @ApiResponse({ status: 401, description: 'Token JWT inválido ou ausente' })
   @ApiResponse({ status: 403, description: 'Usuário não tem permissão (apenas ADMIN pode acessar)' })
   async createAddress(
-    @Request() req,
     @Body() createAddressDto: CreateAddressDto,
   ): Promise<AddressResponseDto> {
-    return this.addressesService.createAddress(req.user.id, createAddressDto);
+    return this.addressesService.createAddress(createAddressDto);
   }
 
   @Get()
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN)
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Listar endereços do usuário (Admin)' })
+  @ApiOperation({ summary: 'Listar endereços de um cliente (Admin)' })
   @ApiResponse({ status: 200, description: 'Endereços listados com sucesso', type: [AddressResponseDto] })
   @ApiResponse({ status: 401, description: 'Token JWT inválido ou ausente' })
   @ApiResponse({ status: 403, description: 'Usuário não tem permissão (apenas ADMIN pode acessar)' })
-  async findAllAddresses(@Request() req): Promise<AddressResponseDto[]> {
-    return this.addressesService.findAllAddresses(req.user.id);
+  async findAllAddresses(@Query('clientId') clientId: string): Promise<AddressResponseDto[]> {
+    return this.addressesService.findAllAddresses(clientId);
   }
 
   @Get(':id')
@@ -173,10 +173,10 @@ export class AddressesController {
   @ApiResponse({ status: 403, description: 'Usuário não tem permissão (apenas ADMIN pode acessar)' })
   @ApiResponse({ status: 404, description: 'Endereço não encontrado' })
   async findAddressById(
-    @Request() req,
     @Param('id') id: string,
+    @Query('clientId') clientId: string,
   ): Promise<AddressResponseDto> {
-    return this.addressesService.findAddressById(req.user.id, id);
+    return this.addressesService.findAddressById(clientId, id);
   }
 
   @Put(':id')
@@ -190,11 +190,11 @@ export class AddressesController {
   @ApiResponse({ status: 403, description: 'Usuário não tem permissão (apenas ADMIN pode acessar)' })
   @ApiResponse({ status: 404, description: 'Endereço não encontrado' })
   async updateAddress(
-    @Request() req,
     @Param('id') id: string,
     @Body() updateAddressDto: UpdateAddressDto,
+    @Query('clientId') clientId: string,
   ): Promise<AddressResponseDto> {
-    return this.addressesService.updateAddress(req.user.id, id, updateAddressDto);
+    return this.addressesService.updateAddress(clientId, id, updateAddressDto);
   }
 
   @Delete(':id')
@@ -208,9 +208,9 @@ export class AddressesController {
   @ApiResponse({ status: 403, description: 'Usuário não tem permissão (apenas ADMIN pode acessar)' })
   @ApiResponse({ status: 404, description: 'Endereço não encontrado' })
   async deleteAddress(
-    @Request() req,
     @Param('id') id: string,
+    @Query('clientId') clientId: string,
   ): Promise<void> {
-    return this.addressesService.deleteAddress(req.user.id, id);
+    return this.addressesService.deleteAddress(clientId, id);
   }
 } 

@@ -8,11 +8,13 @@ import { AddressResponseDto } from './dto/address-response.dto';
 export class AddressesService {
   constructor(private prisma: PrismaService) {}
 
-  async createAddress(clientId: string, createAddressDto: CreateAddressDto): Promise<AddressResponseDto> {
+  async createAddress(createAddressDto: CreateAddressDto): Promise<AddressResponseDto> {
+    const { clientId, ...addressData } = createAddressDto;
+    
     const address = await this.prisma.address.create({
       data: {
         clientId,
-        ...createAddressDto,
+        ...addressData,
       },
     });
 
