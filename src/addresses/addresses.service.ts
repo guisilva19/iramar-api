@@ -8,10 +8,10 @@ import { AddressResponseDto } from './dto/address-response.dto';
 export class AddressesService {
   constructor(private prisma: PrismaService) {}
 
-  async createAddress(userId: string, createAddressDto: CreateAddressDto): Promise<AddressResponseDto> {
+  async createAddress(clientId: string, createAddressDto: CreateAddressDto): Promise<AddressResponseDto> {
     const address = await this.prisma.address.create({
       data: {
-        userId,
+        clientId,
         ...createAddressDto,
       },
     });
@@ -19,20 +19,20 @@ export class AddressesService {
     return this.formatAddressResponse(address);
   }
 
-  async findAllAddresses(userId: string): Promise<AddressResponseDto[]> {
+  async findAllAddresses(clientId: string): Promise<AddressResponseDto[]> {
     const addresses = await this.prisma.address.findMany({
-      where: { userId },
+      where: { clientId },
       orderBy: { createdAt: 'desc' },
     });
 
     return addresses.map(address => this.formatAddressResponse(address));
   }
 
-  async findAddressById(userId: string, addressId: string): Promise<AddressResponseDto> {
+  async findAddressById(clientId: string, addressId: string): Promise<AddressResponseDto> {
     const address = await this.prisma.address.findFirst({
       where: {
         id: addressId,
-        userId,
+        clientId,
       },
     });
 
@@ -44,14 +44,14 @@ export class AddressesService {
   }
 
   async updateAddress(
-    userId: string,
+    clientId: string,
     addressId: string,
     updateAddressDto: UpdateAddressDto,
   ): Promise<AddressResponseDto> {
     const address = await this.prisma.address.findFirst({
       where: {
         id: addressId,
-        userId,
+        clientId,
       },
     });
 
@@ -67,11 +67,11 @@ export class AddressesService {
     return this.formatAddressResponse(updatedAddress);
   }
 
-  async deleteAddress(userId: string, addressId: string): Promise<void> {
+  async deleteAddress(clientId: string, addressId: string): Promise<void> {
     const address = await this.prisma.address.findFirst({
       where: {
         id: addressId,
-        userId,
+        clientId,
       },
     });
 
@@ -87,7 +87,7 @@ export class AddressesService {
   private formatAddressResponse(address: any): AddressResponseDto {
     return {
       id: address.id,
-      userId: address.userId,
+      clientId: address.clientId,
       street: address.street,
       number: address.number,
       complement: address.complement,

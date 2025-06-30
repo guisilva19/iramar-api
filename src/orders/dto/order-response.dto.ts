@@ -55,7 +55,7 @@ export class OrderResponseDto {
   id: string;
 
   @ApiProperty()
-  userId: string;
+  clientId: string;
 
   @ApiProperty({ enum: OrderStatus })
   status: OrderStatus;

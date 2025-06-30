@@ -28,7 +28,7 @@ export class CartResponseDto {
   id: string;
 
   @ApiProperty()
-  userId: string;
+  clientId: string;
 
   @ApiProperty({ type: [CartItemResponseDto] })
   items: CartItemResponseDto[];

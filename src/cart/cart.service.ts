@@ -8,9 +8,9 @@ import { CartResponseDto, CartItemResponseDto } from './dto/cart-response.dto';
 export class CartService {
   constructor(private prisma: PrismaService) {}
 
-  async getCart(userId: string): Promise<CartResponseDto> {
+  async getCart(clientId: string): Promise<CartResponseDto> {
     const cart = await this.prisma.cart.findUnique({
-      where: { userId },
+      where: { clientId },
       include: {
         items: {
           include: {
@@ -23,7 +23,7 @@ export class CartService {
     if (!cart) {
       // Create empty cart if it doesn't exist
       const newCart = await this.prisma.cart.create({
-        data: { userId },
+        data: { clientId },
         include: {
           items: {
             include: {
@@ -38,7 +38,7 @@ export class CartService {
     return this.formatCartResponse(cart);
   }
 
-  async addToCart(userId: string, addToCartDto: AddToCartDto): Promise<CartResponseDto> {
+  async addToCart(clientId: string, addToCartDto: AddToCartDto): Promise<CartResponseDto> {
     const { productId, quantity } = addToCartDto;
 
     // Verify product exists
@@ -52,7 +52,7 @@ export class CartService {
 
     // Get or create cart
     let cart = await this.prisma.cart.findUnique({
-      where: { userId },
+      where: { clientId },
       include: {
         items: {
           include: {
@@ -64,7 +64,7 @@ export class CartService {
 
     if (!cart) {
       cart = await this.prisma.cart.create({
-        data: { userId },
+        data: { clientId },
         include: {
           items: {
             include: {
@@ -97,7 +97,7 @@ export class CartService {
 
     // Return updated cart
     const updatedCart = await this.prisma.cart.findUnique({
-      where: { userId },
+      where: { clientId },
       include: {
         items: {
           include: {
@@ -110,14 +110,14 @@ export class CartService {
     return this.formatCartResponse(updatedCart);
   }
 
-  async updateCartItem(userId: string, itemId: string, updateDto: UpdateCartItemDto): Promise<CartResponseDto> {
+  async updateCartItem(clientId: string, itemId: string, updateDto: UpdateCartItemDto): Promise<CartResponseDto> {
     const { quantity } = updateDto;
 
     // Verify cart item exists and belongs to user
     const cartItem = await this.prisma.cartItem.findFirst({
       where: {
         id: itemId,
-        cart: { userId },
+        cart: { clientId },
       },
     });
 
@@ -133,7 +133,7 @@ export class CartService {
 
     // Return updated cart
     const updatedCart = await this.prisma.cart.findUnique({
-      where: { userId },
+      where: { clientId },
       include: {
         items: {
           include: {
@@ -146,12 +146,12 @@ export class CartService {
     return this.formatCartResponse(updatedCart);
   }
 
-  async removeFromCart(userId: string, itemId: string): Promise<CartResponseDto> {
+  async removeFromCart(clientId: string, itemId: string): Promise<CartResponseDto> {
     // Verify cart item exists and belongs to user
     const cartItem = await this.prisma.cartItem.findFirst({
       where: {
         id: itemId,
-        cart: { userId },
+        cart: { clientId },
       },
     });
 
@@ -166,7 +166,7 @@ export class CartService {
 
     // Return updated cart
     const updatedCart = await this.prisma.cart.findUnique({
-      where: { userId },
+      where: { clientId },
       include: {
         items: {
           include: {
@@ -179,9 +179,9 @@ export class CartService {
     return this.formatCartResponse(updatedCart);
   }
 
-  async clearCart(userId: string): Promise<CartResponseDto> {
+  async clearCart(clientId: string): Promise<CartResponseDto> {
     const cart = await this.prisma.cart.findUnique({
-      where: { userId },
+      where: { clientId },
     });
 
     if (!cart) {
@@ -195,7 +195,7 @@ export class CartService {
 
     // Return empty cart
     const emptyCart = await this.prisma.cart.findUnique({
-      where: { userId },
+      where: { clientId },
       include: {
         items: {
           include: {
@@ -224,7 +224,7 @@ export class CartService {
 
     return {
       id: cart.id,
-      userId: cart.userId,
+      clientId: cart.clientId,
       items,
       total,
       itemCount,

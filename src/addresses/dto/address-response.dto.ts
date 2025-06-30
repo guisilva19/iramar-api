@@ -5,7 +5,7 @@ export class AddressResponseDto {
   id: string;
 
   @ApiProperty()
-  userId: string;
+  clientId: string;
 
   @ApiProperty()
   street: string;

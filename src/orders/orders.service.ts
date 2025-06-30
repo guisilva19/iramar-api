@@ -15,14 +15,14 @@ export class OrdersService {
     private cartService: CartService,
   ) {}
 
-  async createOrder(userId: string, createOrderDto: CreateOrderDto): Promise<OrderResponseDto> {
+  async createOrder(clientId: string, createOrderDto: CreateOrderDto): Promise<OrderResponseDto> {
     const { addressId, paymentMethod } = createOrderDto;
 
     // Verify address exists and belongs to user
     const address = await this.prisma.address.findFirst({
       where: {
         id: addressId,
-        userId,
+        clientId,
       },
     });
 
@@ -31,7 +31,7 @@ export class OrdersService {
     }
 
     // Get user's cart
-    const cart = await this.cartService.getCart(userId);
+    const cart = await this.cartService.getCart(clientId);
 
     if (cart.items.length === 0) {
       throw new BadRequestException('Cart is empty');
@@ -40,7 +40,7 @@ export class OrdersService {
     // Create order
     const order = await this.prisma.order.create({
       data: {
-        userId,
+        clientId,
         addressId,
         paymentMethod,
         total: cart.total,
@@ -63,17 +63,17 @@ export class OrdersService {
     });
 
     // Clear cart after order creation
-    await this.cartService.clearCart(userId);
+    await this.cartService.clearCart(clientId);
 
     return this.formatOrderResponse(order);
   }
 
-  async findAllOrders(userId: string, query: FindAllOrdersDto): Promise<PaginatedOrdersResponseDto> {
+  async findAllOrders(clientId: string, query: FindAllOrdersDto): Promise<PaginatedOrdersResponseDto> {
     const { page = 1, limit = 10, status } = query;
     const skip = (page - 1) * limit;
 
     const where = {
-      userId,
+      clientId,
       ...(status && { status }),
     };
 
@@ -106,11 +106,11 @@ export class OrdersService {
     };
   }
 
-  async findOrderById(userId: string, orderId: string): Promise<OrderResponseDto> {
+  async findOrderById(clientId: string, orderId: string): Promise<OrderResponseDto> {
     const order = await this.prisma.order.findFirst({
       where: {
         id: orderId,
-        userId,
+        clientId,
       },
       include: {
         items: {
@@ -130,7 +130,7 @@ export class OrdersService {
   }
 
   async updateOrderStatus(
-    userId: string,
+    clientId: string,
     orderId: string,
     updateDto: UpdateOrderStatusDto,
   ): Promise<OrderResponseDto> {
@@ -139,7 +139,7 @@ export class OrdersService {
     const order = await this.prisma.order.findFirst({
       where: {
         id: orderId,
-        userId,
+        clientId,
       },
     });
 
@@ -168,11 +168,11 @@ export class OrdersService {
     return this.formatOrderResponse(updatedOrder);
   }
 
-  async cancelOrder(userId: string, orderId: string): Promise<OrderResponseDto> {
+  async cancelOrder(clientId: string, orderId: string): Promise<OrderResponseDto> {
     const order = await this.prisma.order.findFirst({
       where: {
         id: orderId,
-        userId,
+        clientId,
       },
     });
 
@@ -219,11 +219,11 @@ export class OrdersService {
             },
           },
           address: true,
-          user: {
+          client: {
             select: {
               id: true,
               name: true,
-              email: true,
+              phone: true,
             },
           },
         },
@@ -324,7 +324,7 @@ export class OrdersService {
 
     return {
       id: order.id,
-      userId: order.userId,
+      clientId: order.clientId,
       status: order.status,
       total: order.total,
       items,
