@@ -22,61 +22,55 @@ import { Roles } from '../auth/decorators/roles.decorator';
 import { Role } from '@prisma/client';
 
 @ApiTags('Pedidos')
-@ApiBearerAuth()
 @Controller('orders')
-@UseGuards(JwtAuthGuard, RolesGuard)
 export class OrdersController {
   constructor(private readonly ordersService: OrdersService) {}
 
-  // Customer routes (agora ADMIN também pode acessar)
+  // Customer routes (sem autenticação)
   @Post()
-  @Roles(Role.ADMIN)
   @ApiOperation({ summary: 'Criar novo pedido' })
+  @ApiQuery({ name: 'clientId', required: true, type: String, description: 'ID do cliente' })
   @ApiResponse({ status: 201, description: 'Pedido criado com sucesso', type: OrderResponseDto })
-  @ApiResponse({ status: 401, description: 'Token JWT inválido ou ausente' })
-  @ApiResponse({ status: 403, description: 'Usuário não tem permissão (apenas CUSTOMER e ADMIN podem acessar)' })
   @ApiResponse({ status: 404, description: 'Endereço não encontrado' })
   @ApiResponse({ status: 400, description: 'Carrinho vazio' })
   async createOrder(
-    @Request() req,
+    @Query('clientId') clientId: string,
     @Body() createOrderDto: CreateOrderDto,
   ): Promise<OrderResponseDto> {
-    return this.ordersService.createOrder(req.user.id, createOrderDto);
+    return this.ordersService.createOrder(clientId, createOrderDto);
   }
 
   @Get()
-  @Roles(Role.ADMIN)
   @ApiOperation({ summary: 'Listar pedidos do usuário' })
+  @ApiQuery({ name: 'clientId', required: true, type: String, description: 'ID do cliente' })
   @ApiQuery({ name: 'page', required: false, type: Number })
   @ApiQuery({ name: 'limit', required: false, type: Number })
   @ApiQuery({ name: 'status', required: false, enum: ['PENDENTE', 'EM_ANDAMENTO', 'ENVIADO', 'ENTREGUE', 'CANCELADO'] })
   @ApiResponse({ status: 200, description: 'Pedidos listados com sucesso', type: PaginatedOrdersResponseDto })
-  @ApiResponse({ status: 401, description: 'Token JWT inválido ou ausente' })
-  @ApiResponse({ status: 403, description: 'Usuário não tem permissão (apenas CUSTOMER e ADMIN podem acessar)' })
   async findAllOrders(
-    @Request() req,
+    @Query('clientId') clientId: string,
     @Query() query: FindAllOrdersDto,
   ): Promise<PaginatedOrdersResponseDto> {
-    return this.ordersService.findAllOrders(req.user.id, query);
+    return this.ordersService.findAllOrders(clientId, query);
   }
 
   @Get(':id')
-  @Roles(Role.ADMIN)
   @ApiOperation({ summary: 'Obter pedido por ID' })
   @ApiParam({ name: 'id', description: 'ID do pedido' })
+  @ApiQuery({ name: 'clientId', required: true, type: String, description: 'ID do cliente' })
   @ApiResponse({ status: 200, description: 'Pedido obtido com sucesso', type: OrderResponseDto })
-  @ApiResponse({ status: 401, description: 'Token JWT inválido ou ausente' })
-  @ApiResponse({ status: 403, description: 'Usuário não tem permissão (apenas CUSTOMER e ADMIN podem acessar)' })
   @ApiResponse({ status: 404, description: 'Pedido não encontrado' })
   async findOrderById(
-    @Request() req,
     @Param('id') id: string,
+    @Query('clientId') clientId: string,
   ): Promise<OrderResponseDto> {
-    return this.ordersService.findOrderById(req.user.id, id);
+    return this.ordersService.findOrderById(clientId, id);
   }
 
   @Put(':id/status')
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN)
+  @ApiBearerAuth()
   @ApiOperation({ summary: 'Atualizar status do pedido' })
   @ApiParam({ name: 'id', description: 'ID do pedido' })
   @ApiResponse({ status: 200, description: 'Status atualizado com sucesso', type: OrderResponseDto })
@@ -93,7 +87,9 @@ export class OrdersController {
   }
 
   @Put(':id/cancel')
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN)
+  @ApiBearerAuth()
   @ApiOperation({ summary: 'Cancelar pedido' })
   @ApiParam({ name: 'id', description: 'ID do pedido' })
   @ApiResponse({ status: 200, description: 'Pedido cancelado com sucesso', type: OrderResponseDto })
@@ -110,7 +106,9 @@ export class OrdersController {
 
   // Admin routes (mantidas separadas para funcionalidades específicas de admin)
   @Get('admin/all')
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN)
+  @ApiBearerAuth()
   @ApiOperation({ summary: 'Listar todos os pedidos (Admin)' })
   @ApiQuery({ name: 'page', required: false, type: Number })
   @ApiQuery({ name: 'limit', required: false, type: Number })
@@ -125,7 +123,9 @@ export class OrdersController {
   }
 
   @Put('admin/:id/status')
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN)
+  @ApiBearerAuth()
   @ApiOperation({ summary: 'Atualizar status do pedido (Admin)' })
   @ApiParam({ name: 'id', description: 'ID do pedido' })
   @ApiResponse({ status: 200, description: 'Status atualizado com sucesso', type: OrderResponseDto })
