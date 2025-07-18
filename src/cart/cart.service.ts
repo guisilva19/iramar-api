@@ -16,6 +16,9 @@ export class CartService {
           include: {
             product: true,
           },
+          orderBy: {
+            id: 'asc',
+          },
         },
       },
     });
@@ -58,6 +61,9 @@ export class CartService {
           include: {
             product: true,
           },
+          orderBy: {
+            id: 'asc',
+          },
         },
       },
     });
@@ -69,6 +75,9 @@ export class CartService {
           items: {
             include: {
               product: true,
+            },
+            orderBy: {
+              id: 'asc',
             },
           },
         },
@@ -102,6 +111,9 @@ export class CartService {
         items: {
           include: {
             product: true,
+          },
+          orderBy: {
+            id: 'asc',
           },
         },
       },
@@ -200,6 +212,9 @@ export class CartService {
         items: {
           include: {
             product: true,
+          },
+          orderBy: {
+            id: 'asc',
           },
         },
       },
