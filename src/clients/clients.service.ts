@@ -17,13 +17,18 @@ export class ClientsService {
     });
 
     if (existingClient) {
-      // Se existe, retorna o cliente existente (login)
+      // Se existe, atualiza o nome e retorna o cliente
+      const updatedClient = await this.prisma.client.update({
+        where: { id: existingClient.id },
+        data: { name },
+      });
+
       return {
-        id: existingClient.id,
-        name: existingClient.name,
-        phone: existingClient.phone,
-        createdAt: existingClient.createdAt,
-        updatedAt: existingClient.updatedAt,
+        id: updatedClient.id,
+        name: updatedClient.name,
+        phone: updatedClient.phone,
+        createdAt: updatedClient.createdAt,
+        updatedAt: updatedClient.updatedAt,
       };
     }
 

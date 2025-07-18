@@ -24,7 +24,7 @@ import { ClientResponseDto } from './dto/client-response.dto';
 export class ClientsController {
   constructor(private readonly clientsService: ClientsService) {}
 
-  @Post('register')
+  @Post('register-or-login')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Cadastrar ou fazer login de cliente',
