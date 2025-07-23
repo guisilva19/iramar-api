@@ -129,8 +129,7 @@ enum OrderStatus {
 }
 
 enum PaymentMethod {
-  CARTAO_CREDITO
-  CARTAO_DEBITO
+  CARTAO
   PIX
   DINHEIRO
 }
