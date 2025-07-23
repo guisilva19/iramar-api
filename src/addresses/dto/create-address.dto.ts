@@ -14,6 +14,7 @@ export class CreateAddressDto {
     example: 'Rua das Flores'
   })
   @IsString()
+  @IsOptional()
   street: string;
 
   @ApiProperty({
@@ -21,6 +22,7 @@ export class CreateAddressDto {
     example: '123'
   })
   @IsString()
+  @IsOptional()
   number: string;
 
   @ApiPropertyOptional({
@@ -36,26 +38,20 @@ export class CreateAddressDto {
     example: 'Centro'
   })
   @IsString()
+  @IsOptional()
   neighborhood: string;
 
   @ApiProperty({
-    description: 'Cidade',
-    example: 'São Paulo'
+    description: 'Latitude',
+    example: -23.5505
   })
-  @IsString()
-  city: string;
+  @IsOptional()
+  lat: any;
 
   @ApiProperty({
-    description: 'Estado',
-    example: 'SP'
+    description: 'Longitude',
+    example: -46.6333
   })
-  @IsString()
-  state: string;
-
-  @ApiProperty({
-    description: 'CEP',
-    example: '01234-567'
-  })
-  @IsString()
-  zipCode: string;
+  @IsOptional()
+  lng: any;
 } 

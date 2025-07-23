@@ -105,9 +105,12 @@ model Address {
   id           String   @id @default(uuid())
   client       Client   @relation(fields: [clientId], references: [id])
   clientId     String
-  street       String
-  number       String
+  street       String?
+  number       String?
   complement   String?
+  neighborhood String?
+  lat          Float?
+  lng          Float?
   orders       Order[]
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
@@ -129,4 +132,5 @@ enum PaymentMethod {
   CARTAO_CREDITO
   CARTAO_DEBITO
   PIX
+  DINHEIRO
 }
