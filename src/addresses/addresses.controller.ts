@@ -30,7 +30,6 @@ export class AddressesController {
 
   @Get(':id')
   @ApiOperation({ summary: 'Obter endereço por ID' })
-  @ApiParam({ name: 'id', description: 'ID do endereço' })
   @ApiResponse({ status: 200, description: 'Endereço obtido com sucesso', type: AddressResponseDto })
   @ApiResponse({ status: 404, description: 'Endereço não encontrado' })
   async findAddressById(
