@@ -33,4 +33,10 @@ export class AddressResponseDto {
 
   @ApiProperty()
   updatedAt: Date;
+
+  @ApiProperty()
+  lat: any;
+
+  @ApiProperty()
+  lng: any;
 } 

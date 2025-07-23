@@ -34,10 +34,9 @@ export class AddressesController {
   @ApiResponse({ status: 200, description: 'Endereço obtido com sucesso', type: AddressResponseDto })
   @ApiResponse({ status: 404, description: 'Endereço não encontrado' })
   async findAddressById(
-    @Param('id') id: string,
     @Query('clientId') clientId: string,
   ): Promise<AddressResponseDto> {
-    return this.addressesService.findAddressById(clientId, id);
+    return this.addressesService.findAddressById(clientId);
   }
 
   @Put(':id')

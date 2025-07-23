@@ -30,10 +30,9 @@ export class AddressesService {
     return addresses.map(address => this.formatAddressResponse(address));
   }
 
-  async findAddressById(clientId: string, addressId: string): Promise<AddressResponseDto> {
+  async findAddressById(clientId: string): Promise<AddressResponseDto> {
     const address = await this.prisma.address.findFirst({
       where: {
-        id: addressId,
         clientId,
       },
     });
@@ -99,6 +98,8 @@ export class AddressesService {
       zipCode: address.zipCode,
       createdAt: address.createdAt,
       updatedAt: address.updatedAt,
+      lat: address.lat,
+      lng: address.lng,
     };
   }
 } 
