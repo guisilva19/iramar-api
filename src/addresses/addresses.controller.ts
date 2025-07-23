@@ -28,7 +28,6 @@ export class AddressesController {
     return this.addressesService.createAddress(createAddressDto);
   }
 
-  @Get(':id')
   @ApiOperation({ summary: 'Obter endereço por ID' })
   @ApiResponse({ status: 200, description: 'Endereço obtido com sucesso', type: AddressResponseDto })
   @ApiResponse({ status: 404, description: 'Endereço não encontrado' })
