@@ -200,6 +200,34 @@ export class OrdersService {
     return this.formatOrderResponse(updatedOrder);
   }
 
+  async cancelOrderClient(clientId: string, orderId: string): Promise<OrderResponseDto> {
+    const order = await this.prisma.order.findFirst({
+      where: {
+        id: orderId,
+        clientId,
+      },
+    });
+
+    if (!order) {
+      throw new NotFoundException('Order not found');
+    }
+
+    const updatedOrder = await this.prisma.order.update({
+      where: { id: orderId },
+      data: { status: OrderStatus.CANCELADO },
+      include: {
+        items: {
+          include: {
+            product: true,
+          },
+        },
+        address: true,
+      },
+    });
+
+    return this.formatOrderResponse(updatedOrder);
+  }
+
   // Admin methods
   async findAllOrdersAdmin(query: FindAllOrdersDto): Promise<AdminPaginatedOrdersResponseDto> {
     const { page = 1, limit = 10, status } = query;

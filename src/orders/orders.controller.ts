@@ -86,7 +86,7 @@ export class OrdersController {
     return this.ordersService.updateOrderStatus(req.user.id, id, updateDto);
   }
 
-  @Put(':id/cancel')
+  @Put(':id/cancel/admin')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN)
   @ApiBearerAuth()
@@ -102,6 +102,20 @@ export class OrdersController {
     @Param('id') id: string,
   ): Promise<OrderResponseDto> {
     return this.ordersService.cancelOrder(req.user.id, id);
+  }
+
+  @Put(':id/cancel')
+  @ApiOperation({ summary: 'Cancelar pedido' })
+  @ApiParam({ name: 'id', description: 'ID do pedido' })
+  @ApiQuery({ name: 'clientId', required: true, type: String, description: 'ID do cliente' })
+  @ApiResponse({ status: 200, description: 'Pedido cancelado com sucesso', type: OrderResponseDto })
+  @ApiResponse({ status: 404, description: 'Pedido não encontrado' })
+  @ApiResponse({ status: 400, description: 'Pedido não pode ser cancelado' })
+  async cancelOrderClient(
+    @Param('id') id: string,
+    @Query('clientId') clientId: string,
+  ): Promise<OrderResponseDto> {
+    return this.ordersService.cancelOrderClient(clientId, id);
   }
 
   // Admin routes (mantidas separadas para funcionalidades específicas de admin)
