@@ -246,7 +246,14 @@ export class OrdersService {
               product: true,
             },
           },
-          address: true,
+          address: {
+            select: {
+              id: true,
+              lat: true,
+              lng: true,
+              clientId: true,
+            },
+          },
           client: {
             select: {
               id: true,
