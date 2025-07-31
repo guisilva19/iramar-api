@@ -43,11 +43,10 @@ export class CreateProductDto {
       'Arroz integral tipo 1, pacote de 1kg. Rico em fibras e nutrientes essenciais.',
     minLength: 10,
     maxLength: 500,
-    required: true,
     type: String,
   })
   @IsString()
-  @IsNotEmpty()
+  @IsOptional()
   description: string;
 
   @ApiProperty({
