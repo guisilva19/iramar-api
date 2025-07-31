@@ -9,6 +9,7 @@ import { OrdersModule } from './orders/orders.module';
 import { AddressesModule } from './addresses/addresses.module';
 import { DashboardModule } from './dashboard/dashboard.module';
 import { ClientsModule } from './clients/clients.module';
+import { HighlightsModule } from './highlights/highlights.module';
 import { AppController } from './app.controller';
 
 @Module({
@@ -23,6 +24,7 @@ import { AppController } from './app.controller';
     AddressesModule,
     DashboardModule,
     ClientsModule,
+    HighlightsModule,
   ],
   controllers: [AppController],
   providers: [],

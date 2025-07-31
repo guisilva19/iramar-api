@@ -36,7 +36,9 @@ export class ProductsService {
     const skip = (page - 1) * limit;
 
     // Construir condições de filtro
-    const where: any = {};
+    const where: any = {
+      isActive: true, // Apenas produtos ativos
+    };
 
     // Aplicar filtro de categoria apenas se fornecido
     if (categoryId) {
@@ -49,11 +51,13 @@ export class ProductsService {
         {
           name: {
             contains: search.trim(),
+            mode: 'insensitive',
           },
         },
         {
           description: {
             contains: search.trim(),
+            mode: 'insensitive',
           },
         },
       ];
@@ -81,6 +85,69 @@ export class ProductsService {
 
     return {
       data: products,
+      total,
+      page,
+      limit,
+      totalPages,
+      hasPreviousPage,
+      hasNextPage,
+    };
+  }
+
+  /**
+   * Busca produtos inativos com filtros e paginação
+   */
+  async findInactiveProducts(query: FindAllProductsDto): Promise<PaginatedProductsResponseDto> {
+    const { categoryId, search, page = 1, limit = 10 } = query;
+    const skip = (page - 1) * limit;
+
+    // Construir condições de filtro
+    const where: any = {
+      isActive: false, // Apenas produtos inativos
+    };
+
+    // Aplicar filtro de categoria apenas se fornecido
+    // if (categoryId) {
+    //   where.categoryId = categoryId;
+    // }
+
+    // Aplicar filtro de busca apenas se fornecido
+    // if (search && search.trim() !== '') {
+    //   where.OR = [
+    //     {
+    //       name: {
+    //         contains: search.trim(),
+    //         mode: 'insensitive',
+    //       },
+    //     },
+    //     {
+    //       description: {
+    //         contains: search.trim(),
+    //         mode: 'insensitive',
+    //       },
+    //     },
+    //   ];
+    // }
+
+    // Buscar produtos inativos com filtros e paginação
+    const [products, total] = await Promise.all([
+      this.prisma.product.findMany({
+        where,
+        skip,
+        take: limit,
+        orderBy: {
+          createdAt: 'desc',
+        },
+      }),
+      this.prisma.product.count({ where }),
+    ]);
+
+    const totalPages = Math.ceil(total / limit);
+    const hasPreviousPage = page > 1;
+    const hasNextPage = page < totalPages;
+
+    return {
+      data: products as ProductResponseDto[],
       total,
       page,
       limit,
@@ -154,7 +221,7 @@ export class ProductsService {
 
     // Se for ordenação aleatória, usar query raw
     if (sortBy === SortOrder.RANDOM) {
-      let whereCondition = 'TRUE';
+      let whereCondition = 'p."isActive" = true'; // Apenas produtos ativos
       
       if (categoryId) {
         whereCondition += ` AND p."categoryId" = '${categoryId}'`;
@@ -198,7 +265,9 @@ export class ProductsService {
     }
 
     // Construir condições de filtro para ordenação não-aleatória
-    const where: any = {};
+    const where: any = {
+      isActive: true, // Apenas produtos ativos
+    };
 
     // Aplicar filtro de categoria apenas se fornecido
     if (categoryId) {
@@ -261,20 +330,12 @@ export class ProductsService {
   async findFeaturedProducts(query: FeaturedProductsDto): Promise<ProductResponseDto[]> {
     const { categoryId, limit = 10 } = query;
 
-    // Construir condições de filtro
-    const where: any = {};
-
-    // Aplicar filtro de categoria apenas se fornecido
-    if (categoryId) {
-      where.categoryId = categoryId;
-    }
-
     // Buscar produtos em destaque com ordenação aleatória
     const products = await this.prisma.$queryRaw`
       SELECT p.*, c.id as "categoryId", c.name as "categoryName", c.description as "categoryDescription"
       FROM "Product" p
       LEFT JOIN "Category" c ON p."categoryId" = c.id
-      WHERE ${categoryId ? `p."categoryId" = ${categoryId}::uuid` : 'TRUE'}
+      WHERE p."isActive" = true ${categoryId ? `AND p."categoryId" = ${categoryId}::uuid` : ''}
       ORDER BY RANDOM()
       LIMIT ${limit}
     `;
@@ -300,7 +361,7 @@ export class ProductsService {
           SELECT p.*, c.id as "categoryId", c.name as "categoryName", c.description as "categoryDescription"
           FROM "Product" p
           LEFT JOIN "Category" c ON p."categoryId" = c.id
-          WHERE p."categoryId" = ${categoryId}::uuid ${this.prisma.$queryRawUnsafe(searchCondition)}
+          WHERE p."isActive" = true AND p."categoryId" = ${categoryId}::uuid ${this.prisma.$queryRawUnsafe(searchCondition)}
           ORDER BY RANDOM()
           LIMIT ${limit}
           OFFSET ${skip}
@@ -308,7 +369,7 @@ export class ProductsService {
         this.prisma.$queryRaw`
           SELECT COUNT(*) as count
           FROM "Product" p
-          WHERE p."categoryId" = ${categoryId}::uuid ${this.prisma.$queryRawUnsafe(searchCondition)}
+          WHERE p."isActive" = true AND p."categoryId" = ${categoryId}::uuid ${this.prisma.$queryRawUnsafe(searchCondition)}
         `
       ]);
 
@@ -331,6 +392,7 @@ export class ProductsService {
     // Construir condições de filtro para ordenação não-aleatória
     const where: any = {
       categoryId,
+      isActive: true, // Apenas produtos ativos
     };
 
     // Aplicar filtro de busca apenas se fornecido
@@ -399,7 +461,7 @@ export class ProductsService {
           SELECT p.*, c.id as "categoryId", c.name as "categoryName", c.description as "categoryDescription"
           FROM "Product" p
           LEFT JOIN "Category" c ON p."categoryId" = c.id
-          WHERE (LOWER(p.name) LIKE LOWER('%${search.trim()}%') OR LOWER(p.description) LIKE LOWER('%${search.trim()}%')) ${this.prisma.$queryRawUnsafe(categoryCondition)}
+          WHERE p."isActive" = true AND (LOWER(p.name) LIKE LOWER('%${search.trim()}%') OR LOWER(p.description) LIKE LOWER('%${search.trim()}%')) ${this.prisma.$queryRawUnsafe(categoryCondition)}
           ORDER BY RANDOM()
           LIMIT ${limit}
           OFFSET ${skip}
@@ -407,7 +469,7 @@ export class ProductsService {
         this.prisma.$queryRaw`
           SELECT COUNT(*) as count
           FROM "Product" p
-          WHERE (LOWER(p.name) LIKE LOWER('%${search.trim()}%') OR LOWER(p.description) LIKE LOWER('%${search.trim()}%')) ${this.prisma.$queryRawUnsafe(categoryCondition)}
+          WHERE p."isActive" = true AND (LOWER(p.name) LIKE LOWER('%${search.trim()}%') OR LOWER(p.description) LIKE LOWER('%${search.trim()}%')) ${this.prisma.$queryRawUnsafe(categoryCondition)}
         `
       ]);
 
@@ -429,6 +491,7 @@ export class ProductsService {
 
     // Construir condições de filtro para ordenação não-aleatória
     const where: any = {
+      isActive: true, // Apenas produtos ativos
       OR: [
         {
           name: {

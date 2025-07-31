@@ -68,6 +68,7 @@ export class ProductsController {
             'Arroz integral tipo 1, pacote de 1kg. Rico em fibras e nutrientes essenciais.',
           price: 8.99,
           categoryId: '123e4567-e89b-12d3-a456-426614174000',
+          isActive: true,
         },
       },
       produto2: {
@@ -77,6 +78,7 @@ export class ProductsController {
           description: 'Feijão carioca de primeira qualidade, pacote de 1kg.',
           price: 7.99,
           categoryId: '123e4567-e89b-12d3-a456-426614174000',
+          isActive: true,
         },
       },
     },
@@ -441,6 +443,70 @@ export class ProductsController {
   }
 
   /**
+   * Lista produtos inativos
+   * @description Retorna uma lista paginada de produtos inativos (isActive: false)
+   */
+  @Get('inactive')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Listar produtos inativos',
+    description:
+      'Retorna uma lista paginada de produtos inativos (isActive: false). Requer autenticação e permissão de administrador.',
+  })
+  @ApiQuery({
+    name: 'page',
+    required: false,
+    description: 'Número da página (começa em 1)',
+    example: 1,
+    type: 'number',
+  })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    description: 'Número de itens por página (máximo 20)',
+    example: 10,
+    type: 'number',
+  })
+  @ApiQuery({
+    name: 'categoryId',
+    required: false,
+    description: 'ID da categoria para filtrar produtos inativos (opcional)',
+    example: '123e4567-e89b-12d3-a456-426614174000',
+    type: 'string',
+    format: 'uuid',
+  })
+  @ApiQuery({
+    name: 'search',
+    required: false,
+    description: 'Termo de busca para filtrar produtos inativos por nome ou descrição (opcional)',
+    example: 'arroz',
+    type: 'string',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Lista de produtos inativos retornada com sucesso.',
+    type: PaginatedProductsResponseDto,
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Dados inválidos fornecidos.',
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Não autorizado. Token de acesso inválido ou ausente.',
+  })
+  @ApiResponse({
+    status: 403,
+    description:
+      'Acesso negado. Usuário não possui permissão de administrador.',
+  })
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
+  findInactiveProducts(@Query() query: FindAllProductsDto) {
+    return this.productsService.findInactiveProducts(query);
+  }
+
+  /**
    * Busca um produto específico
    * @description Retorna os detalhes de um produto específico pelo seu ID
    */
@@ -495,6 +561,18 @@ export class ProductsController {
         summary: 'Atualizar Preço',
         value: {
           price: 9.99,
+        },
+      },
+      desativarProduto: {
+        summary: 'Desativar Produto',
+        value: {
+          isActive: false,
+        },
+      },
+      ativarProduto: {
+        summary: 'Ativar Produto',
+        value: {
+          isActive: true,
         },
       },
     },

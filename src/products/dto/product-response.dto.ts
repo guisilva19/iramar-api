@@ -59,6 +59,12 @@ export class ProductResponseDto {
   image: string | null;
 
   @ApiProperty({
+    example: true,
+    description: 'Status ativo do produto. Produtos inativos não aparecem no e-commerce.',
+  })
+  isActive: boolean;
+
+  @ApiProperty({
     example: '123e4567-e89b-12d3-a456-426614174000',
     description: 'ID da categoria do produto',
     nullable: true,

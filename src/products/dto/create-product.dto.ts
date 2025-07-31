@@ -5,6 +5,7 @@ import {
   IsNotEmpty,
   IsUUID,
   IsOptional,
+  IsBoolean,
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
@@ -15,7 +16,8 @@ import { ApiProperty } from '@nestjs/swagger';
  *   "name": "Arroz Integral Tipo 1",
  *   "description": "Arroz integral tipo 1, pacote de 1kg. Rico em fibras e nutrientes essenciais.",
  *   "price": 8.99,
- *   "categoryId": "123e4567-e89b-12d3-a456-426614174000"
+ *   "categoryId": "123e4567-e89b-12d3-a456-426614174000",
+ *   "isActive": true
  * }
  */
 export class CreateProductDto {
@@ -83,4 +85,15 @@ export class CreateProductDto {
   @IsString()
   @IsOptional()
   image?: string;
+
+  @ApiProperty({
+    example: true,
+    description: 'Status ativo do produto. Produtos inativos não aparecem no e-commerce.',
+    default: true,
+    required: false,
+    type: Boolean,
+  })
+  @IsBoolean()
+  @IsOptional()
+  isActive?: boolean;
 }
