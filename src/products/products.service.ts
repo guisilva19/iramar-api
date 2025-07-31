@@ -37,7 +37,6 @@ export class ProductsService {
 
     // Construir condições de filtro
     const where: any = {
-      isActive: true, // Apenas produtos ativos
     };
 
     // Aplicar filtro de categoria apenas se fornecido
