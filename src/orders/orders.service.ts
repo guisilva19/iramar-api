@@ -16,7 +16,7 @@ export class OrdersService {
   ) {}
 
   async createOrder(clientId: string, createOrderDto: CreateOrderDto): Promise<OrderResponseDto> {
-    const { addressId, paymentMethod } = createOrderDto;
+    const { addressId, paymentMethod, notes } = createOrderDto;
 
     // Verify address exists and belongs to user
     const address = await this.prisma.address.findFirst({
@@ -44,6 +44,7 @@ export class OrdersService {
         addressId,
         paymentMethod,
         total: cart.total,
+        notes,
         items: {
           create: cart.items.map(item => ({
             productId: item.productId,
