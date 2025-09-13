@@ -183,6 +183,7 @@ https://www.mercadoiramar.com.br?phone=${phone}`;
                 throw new Error('Pedido não encontrado');
             }
 
+
             // Gerar mensagem para o entregador
             const message = this.generateDeliveryMessage(order);
 
@@ -283,6 +284,12 @@ https://www.mercadoiramar.com.br?phone=${phone}`;
             if (order.address.number) message += `, ${order.address.number}`;
             if (order.address.complement) message += `, ${order.address.complement}`;
             if (order.address.neighborhood) message += `\n${order.address.neighborhood}`;
+        }
+
+        // Adicionar localização do Google Maps se latitude e longitude estiverem disponíveis
+        if (order.address.lat && order.address.lng) {
+            message += `\n\n🗺️ *LOCALIZAÇÃO:*\n`;
+            message += `https://www.google.com/maps?q=${order.address.lat},${order.address.lng}`;
         }
 
         if (order.notes) {
