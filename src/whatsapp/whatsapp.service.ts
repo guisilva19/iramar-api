@@ -235,14 +235,14 @@ https://www.mercadoiramar.com.br?phone=${phone}`;
         message += `💳 *Pagamento:* ${paymentMethodMap[order.paymentMethod] || order.paymentMethod}\n\n`;
 
         message += `📦 *SEUS ITENS:*\n`;
-        message += `${'─'.repeat(25)}\n`;
+        message += `${'─'.repeat(15)}\n`;
 
         order.items.forEach((item: any, index: number) => {
             message += `${index + 1}. ${item.product.name} - ${item.quantity}x - R$ ${(item.quantity * item.price).toFixed(2).replace('.', ',')}\n`;
         });
 
-        message += `${'─'.repeat(25)}\n`;
-        message += `💰 *TOTAL: R$ ${order.total.toFixed(2).replace('.', ',')}*\n\n`;
+        message += `${'─'.repeat(15)}\n`;
+        message += `💰 *TOTAL: R$ ${order.total.toFixed(2).replace('.', ',')}*`;
 
         if (order.notes) {
             message += `\n\n📝 *Observações:* ${order.notes}`;
@@ -270,21 +270,13 @@ https://www.mercadoiramar.com.br?phone=${phone}`;
         message += `💰 *Valor Total:* R$ ${order.total.toFixed(2).replace('.', ',')}\n\n`;
 
         message += `📦 *ITENS PARA ENTREGA:*\n`;
-        message += `${'─'.repeat(25)}\n`;
+        message += `${'─'.repeat(15)}\n`;
 
         order.items.forEach((item: any, index: number) => {
             message += `${index + 1}. ${item.product.name} - ${item.quantity}x\n`;
         });
 
-        message += `${'─'.repeat(25)}\n`;
-        message += `📍 *ENDEREÇO:*\n`;
-        
-        if (order.address.street) {
-            message += `${order.address.street}`;
-            if (order.address.number) message += `, ${order.address.number}`;
-            if (order.address.complement) message += `, ${order.address.complement}`;
-            if (order.address.neighborhood) message += `\n${order.address.neighborhood}`;
-        }
+        message += `${'─'.repeat(15)}\n`;
 
         // Adicionar localização do Google Maps se latitude e longitude estiverem disponíveis
         if (order.address.lat && order.address.lng) {
