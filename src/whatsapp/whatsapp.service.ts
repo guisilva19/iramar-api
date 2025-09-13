@@ -231,8 +231,6 @@ https://www.mercadoiramar.com.br?phone=${phone}`;
         };
 
         let message = `🛒 *PEDIDO CONFIRMADO - Mercado Iramar*\n\n`;
-        message += `👤 *Cliente:* ${order.client.name}\n`;
-        message += `📱 *Telefone:* ${order.client.phone}\n`;
         message += `💳 *Pagamento:* ${paymentMethodMap[order.paymentMethod] || order.paymentMethod}\n\n`;
 
         message += `📦 *SEUS ITENS:*\n`;
@@ -244,14 +242,6 @@ https://www.mercadoiramar.com.br?phone=${phone}`;
 
         message += `${'─'.repeat(25)}\n`;
         message += `💰 *TOTAL: R$ ${order.total.toFixed(2).replace('.', ',')}*\n\n`;
-
-        message += `📍 *ENDEREÇO DE ENTREGA:*\n`;
-        if (order.address.street) {
-            message += `${order.address.street}`;
-            if (order.address.number) message += `, ${order.address.number}`;
-            if (order.address.complement) message += `, ${order.address.complement}`;
-            if (order.address.neighborhood) message += `\n${order.address.neighborhood}`;
-        }
 
         if (order.notes) {
             message += `\n\n📝 *Observações:* ${order.notes}`;
