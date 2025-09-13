@@ -10,6 +10,7 @@ import { AddressesModule } from './addresses/addresses.module';
 import { DashboardModule } from './dashboard/dashboard.module';
 import { ClientsModule } from './clients/clients.module';
 import { HighlightsModule } from './highlights/highlights.module';
+import { WhatsAppModule } from './whatsapp/whatsapp.module';
 import { AppController } from './app.controller';
 
 @Module({
@@ -25,6 +26,7 @@ import { AppController } from './app.controller';
     DashboardModule,
     ClientsModule,
     HighlightsModule,
+    WhatsAppModule,
   ],
   controllers: [AppController],
   providers: [],

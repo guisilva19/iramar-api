@@ -7,12 +7,14 @@ import { FindAllOrdersDto } from './dto/find-all-orders.dto';
 import { OrderResponseDto, OrderItemResponseDto, OrderAddressResponseDto } from './dto/order-response.dto';
 import { PaginatedOrdersResponseDto, AdminPaginatedOrdersResponseDto } from './dto/paginated-orders-response.dto';
 import { OrderStatus } from '@prisma/client';
+import { WhatsAppService } from 'src/whatsapp/whatsapp.service';
 
 @Injectable()
 export class OrdersService {
   constructor(
     private prisma: PrismaService,
     private cartService: CartService,
+    private whatsappService: WhatsAppService,
   ) {}
 
   async createOrder(clientId: string, createOrderDto: CreateOrderDto): Promise<OrderResponseDto> {
@@ -60,11 +62,26 @@ export class OrdersService {
           },
         },
         address: true,
+        client: true,
       },
     });
 
     // Clear cart after order creation
     await this.cartService.clearCart(clientId);
+    await this.whatsappService.sendOrderToClient({ phone: order.client.phone, orderId: order.id });
+
+    if (process.env.NUMBER_DELIVERY_ONE) {
+      console.log('Enviando mensagem para o entregador1');
+      await this.whatsappService.sendOrderToDelivery({ phone: process.env.NUMBER_DELIVERY_ONE as string, orderId: order.id });
+    }
+    if (process.env.NUMBER_DELIVERY_TWO) {
+      console.log('Enviando mensagem para o entregador2');
+      await this.whatsappService.sendOrderToDelivery({ phone: process.env.NUMBER_DELIVERY_TWO as string, orderId: order.id });
+    }
+    if (process.env.NUMBER_DELIVERY_THREE) {
+      console.log('Enviando mensagem para o entregador3');
+      await this.whatsappService.sendOrderToDelivery({ phone: process.env.NUMBER_DELIVERY_THREE as string, orderId: order.id });
+    }
 
     return this.formatOrderResponse(order);
   }

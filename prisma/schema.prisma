@@ -30,6 +30,8 @@ model Client {
   phone     String    @unique
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
+  lastMessage DateTime?
+  typeLastMessage Int?
   orders    Order[]
   addresses Address[]
   cart      Cart?
