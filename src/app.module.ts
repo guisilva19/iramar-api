@@ -12,6 +12,7 @@ import { ClientsModule } from './clients/clients.module';
 import { HighlightsModule } from './highlights/highlights.module';
 import { WhatsAppModule } from './whatsapp/whatsapp.module';
 import { AppController } from './app.controller';
+import { DeliveryModule } from './delivery/delivery.module';
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { AppController } from './app.controller';
     ClientsModule,
     HighlightsModule,
     WhatsAppModule,
+    DeliveryModule,
   ],
   controllers: [AppController],
   providers: [],
