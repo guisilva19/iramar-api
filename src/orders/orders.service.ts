@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CartService } from '../cart/cart.service';
+import { DeliveryService } from '../delivery/delivery.service';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderStatusDto } from './dto/update-order-status.dto';
 import { FindAllOrdersDto } from './dto/find-all-orders.dto';
@@ -14,6 +15,7 @@ export class OrdersService {
   constructor(
     private prisma: PrismaService,
     private cartService: CartService,
+    private deliveryService: DeliveryService,
     private whatsappService: WhatsAppService,
   ) {}
 
@@ -39,13 +41,21 @@ export class OrdersService {
       throw new BadRequestException('Cart is empty');
     }
 
+    // Get delivery tax
+    const deliveryTax = await this.deliveryService.getDeliveryTax();
+    const deliveryFee = deliveryTax ? deliveryTax.tax : 0;
+
+    // Calculate total with delivery fee
+    const totalWithDelivery = cart.total + deliveryFee;
+
     // Create order
     const order = await this.prisma.order.create({
       data: {
         clientId,
         addressId,
         paymentMethod,
-        total: cart.total,
+        total: totalWithDelivery,
+        taxDelivery: deliveryFee,
         notes,
         items: {
           create: cart.items.map(item => ({
@@ -380,6 +390,7 @@ export class OrdersService {
       clientId: order.clientId,
       status: order.status,
       total: order.total,
+      taxDelivery: order.taxDelivery,
       items,
       address,
       paymentMethod: order.paymentMethod,

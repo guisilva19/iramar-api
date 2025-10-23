@@ -63,6 +63,9 @@ export class OrderResponseDto {
   @ApiProperty()
   total: number;
 
+  @ApiProperty()
+  taxDelivery: number;
+
   @ApiProperty({ type: [OrderItemResponseDto] })
   items: OrderItemResponseDto[];
 

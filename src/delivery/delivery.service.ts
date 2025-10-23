@@ -6,6 +6,8 @@ export class DeliveryService {
     constructor(private readonly prisma: PrismaService) {}
 
     async createDeliveryTax(tax: number) {
+        await this.prisma.deliveryTax.deleteMany();
+
         const deliveryTax = await this.prisma.deliveryTax.create({
             data: { tax },
         });

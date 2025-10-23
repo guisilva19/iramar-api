@@ -28,9 +28,6 @@ export class DeliveryController {
     @ApiOperation({ summary: 'Obter taxa de entrega' })
     @ApiResponse({ status: 200, description: 'Taxa de entrega obtida com sucesso' })
     @ApiResponse({ status: 404, description: 'Taxa de entrega não encontrada' })
-    @ApiBearerAuth()
-    @Roles(Role.ADMIN)
-    @UseGuards(JwtAuthGuard, RolesGuard)
     getDeliveryTax() {
         return this.deliveryService.getDeliveryTax();
     }

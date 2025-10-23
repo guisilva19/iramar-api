@@ -67,6 +67,7 @@ model Order {
   clientId      String
   status        OrderStatus   @default(PENDENTE)
   total         Float
+  taxDelivery   Float @default(0)
   items         OrderItem[]
   address       Address       @relation(fields: [addressId], references: [id])
   addressId     String
