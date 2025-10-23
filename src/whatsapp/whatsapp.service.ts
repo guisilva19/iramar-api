@@ -242,6 +242,11 @@ https://www.mercadoiramar.com.br?phone=${phone}`;
         });
 
         message += `${'─'.repeat(15)}\n`;
+        
+        // Calculate subtotal (items only)
+        const subtotal = order.items.reduce((sum: number, item: any) => sum + (item.quantity * item.price), 0);
+        message += `📦 *Subtotal: R$ ${subtotal.toFixed(2).replace('.', ',')}*\n`;
+        message += `🚚 *Taxa de entrega: R$ ${order.taxDelivery.toFixed(2).replace('.', ',')}*\n`;
         message += `💰 *TOTAL: R$ ${order.total.toFixed(2).replace('.', ',')}*`;
 
         if (order.notes) {
