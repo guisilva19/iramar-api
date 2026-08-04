@@ -87,16 +87,11 @@ export class WhatsAppService {
     messageReturn(type: Number, phone: string) {
         switch (type) {
             case 1:
-                return `Olá! Seja muito bem-vindo(a) ao *Mercado Iramar*! 🛒
+                return `🛒 FAÇA SEU PEDIDO AQUI!
 
-Estamos muito felizes em tê-lo(a) conosco!
+👇 É só clicar no link abaixo e começar suas compras:
+Ps: ENTREGA RÁPIDA 🏍️
 
-*O que você encontra aqui:*
-• Produtos frescos e de qualidade
-• Ofertas especiais todos os dias
-• Entrega rápida
-
-*Acesse nosso site:*
 https://www.mercadoiramar.com.br?phone=${phone}`;
             case 2:
                 return '';
