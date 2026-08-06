@@ -157,8 +157,12 @@ export class ProductsController {
     @UploadedFile(
       new ParseFilePipe({
         validators: [
-          new MaxFileSizeValidator({ maxSize: 2 * 1024 * 1024 }), // 2MB
-          new FileTypeValidator({ fileType: '.(jpg|jpeg|png|gif)' }),
+          new MaxFileSizeValidator({
+            maxSize: 2 * 1024 * 1024,
+          }),
+          new FileTypeValidator({
+            fileType: 'image/*',
+          }),
         ],
       }),
     )
