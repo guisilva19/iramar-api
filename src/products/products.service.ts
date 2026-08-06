@@ -5,14 +5,20 @@ import { CreateProductDto } from './dto/create-product.dto';
 import { FindAllProductsDto } from './dto/find-all-products.dto';
 import { PaginatedProductsResponseDto } from './dto/paginated-products-response.dto';
 import { ProductResponseDto } from './dto/product-response.dto';
-import { EcommerceProductsDto, FeaturedProductsDto, SortOrder } from './dto/ecommerce-products.dto';
+import {
+  EcommerceProductsDto,
+  FeaturedProductsDto,
+  SortOrder,
+} from './dto/ecommerce-products.dto';
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
 import 'dotenv/config';
 
 @Injectable()
 export class ProductsService {
-  private readonly accentedChars = 'áàâãäéèêëíìîïóòôõöúùûüçñÁÀÂÃÄÉÈÊËÍÌÎÏÓÒÔÕÖÚÙÛÜÇÑ';
-  private readonly unaccentedChars = 'aaaaaeeeeiiiiooooouuuucnAAAAAEEEEIIIIOOOOOUUUUCN';
+  private readonly accentedChars =
+    'áàâãäéèêëíìîïóòôõöúùûüçñÁÀÂÃÄÉÈÊËÍÌÎÏÓÒÔÕÖÚÙÛÜÇÑ';
+  private readonly unaccentedChars =
+    'aaaaaeeeeiiiiooooouuuucnAAAAAEEEEIIIIOOOOOUUUUCN';
 
   private s3: S3Client;
 
@@ -22,11 +28,13 @@ export class ProductsService {
       credentials: {
         accessKeyId: `${process.env.AWS_ACCESS_KEY_ID}`,
         secretAccessKey: `${process.env.AWS_SECRET_ACCESS_KEY}`,
-      }
+      },
     });
   }
 
-  async create(createProductDto: CreateProductDto): Promise<ProductResponseDto> {
+  async create(
+    createProductDto: CreateProductDto,
+  ): Promise<ProductResponseDto> {
     return this.prisma.product.create({
       data: createProductDto,
       include: {
@@ -35,13 +43,14 @@ export class ProductsService {
     });
   }
 
-  async findAll(query: FindAllProductsDto): Promise<PaginatedProductsResponseDto> {
+  async findAll(
+    query: FindAllProductsDto,
+  ): Promise<PaginatedProductsResponseDto> {
     const { categoryId, search, page = 1, limit = 10 } = query;
     const skip = (page - 1) * limit;
 
     // Construir condições de filtro
-    const where: any = {
-    };
+    const where: any = {};
 
     // Aplicar filtro de categoria apenas se fornecido
     if (categoryId) {
@@ -100,7 +109,9 @@ export class ProductsService {
   /**
    * Busca produtos inativos com filtros e paginação
    */
-  async findInactiveProducts(query: FindAllProductsDto): Promise<PaginatedProductsResponseDto> {
+  async findInactiveProducts(
+    query: FindAllProductsDto,
+  ): Promise<PaginatedProductsResponseDto> {
     const { categoryId, search, page = 1, limit = 10 } = query;
     const skip = (page - 1) * limit;
 
@@ -175,7 +186,10 @@ export class ProductsService {
     return product;
   }
 
-  async update(id: string, updateProductDto: Partial<CreateProductDto>): Promise<ProductResponseDto> {
+  async update(
+    id: string,
+    updateProductDto: Partial<CreateProductDto>,
+  ): Promise<ProductResponseDto> {
     try {
       return await this.prisma.product.update({
         where: { id },
@@ -199,10 +213,7 @@ export class ProductsService {
     }
   }
 
-  async uploadFile(
-    file: Express.Multer.File,
-  ) {
-   
+  async uploadFile(file: Express.Multer.File) {
     const params = {
       Bucket: process.env.S3_BUCKET_NAME,
       Key: file.originalname,
@@ -212,14 +223,24 @@ export class ProductsService {
     const command = new PutObjectCommand(params);
     await this.s3.send(command);
 
-   return { url: `https://${process.env.S3_BUCKET_NAME}.s3.${process.env.S3_REGION}.amazonaws.com/${file.originalname}` }
+    return {
+      url: `https://${process.env.S3_BUCKET_NAME}.s3.${process.env.S3_REGION}.amazonaws.com/${file.originalname}`,
+    };
   }
 
   /**
    * Busca produtos para o e-commerce com ordenação e filtros
    */
-  async findEcommerceProducts(query: EcommerceProductsDto): Promise<PaginatedProductsResponseDto> {
-    const { categoryId, search, sortBy = SortOrder.RANDOM, page = 1, limit = 20 } = query;
+  async findEcommerceProducts(
+    query: EcommerceProductsDto,
+  ): Promise<PaginatedProductsResponseDto> {
+    const {
+      categoryId,
+      search,
+      sortBy = SortOrder.RANDOM,
+      page = 1,
+      limit = 20,
+    } = query;
     const skip = (page - 1) * limit;
 
     const searchCondition = this.buildOptionalSearchCondition(search);
@@ -262,7 +283,9 @@ export class ProductsService {
   /**
    * Busca produtos em destaque para o e-commerce
    */
-  async findFeaturedProducts(query: FeaturedProductsDto): Promise<ProductResponseDto[]> {
+  async findFeaturedProducts(
+    query: FeaturedProductsDto,
+  ): Promise<ProductResponseDto[]> {
     const { categoryId, limit = 10 } = query;
 
     // Buscar produtos em destaque com ordenação aleatória
@@ -270,7 +293,7 @@ export class ProductsService {
       SELECT p.*, c.id as "categoryId", c.name as "categoryName", c.image as "categoryImage"
       FROM "Product" p
       LEFT JOIN "Category" c ON p."categoryId" = c.id
-      WHERE p."isActive" = true ${categoryId ? `AND p."categoryId" = ${categoryId}::uuid` : ''}
+      WHERE p."isActive" = true ${categoryId ? `AND p."categoryId" = ${categoryId}` : ''}
       ORDER BY RANDOM()
       LIMIT ${limit}
     `;
@@ -281,22 +304,31 @@ export class ProductsService {
   /**
    * Busca produtos por categoria para o e-commerce
    */
-  async findProductsByCategory(categoryId: string, query: EcommerceProductsDto): Promise<PaginatedProductsResponseDto> {
+  async findProductsByCategory(
+    categoryId: string,
+    query: EcommerceProductsDto,
+  ): Promise<PaginatedProductsResponseDto> {
     const { search, sortBy = SortOrder.RANDOM, page = 1, limit = 20 } = query;
     const skip = (page - 1) * limit;
 
     // Se for ordenação aleatória, usar query raw
     if (sortBy === SortOrder.RANDOM) {
-      const searchCondition = search && search.trim() !== '' 
-        ? `AND (LOWER(p.name) LIKE LOWER('%${search.trim()}%') OR LOWER(p.description) LIKE LOWER('%${search.trim()}%'))`
-        : '';
+      const searchCondition =
+        search && search.trim() !== ''
+          ? Prisma.sql`
+            AND (
+              LOWER(p.name) LIKE LOWER(${'%' + search.trim() + '%'})
+              OR LOWER(p.description) LIKE LOWER(${'%' + search.trim() + '%'})
+            )
+          `
+          : Prisma.empty;
 
       const [products, totalResult] = await Promise.all([
         this.prisma.$queryRaw`
           SELECT p.*, c.id as "categoryId", c.name as "categoryName", c.image as "categoryImage"
           FROM "Product" p
           LEFT JOIN "Category" c ON p."categoryId" = c.id
-          WHERE p."isActive" = true AND p."categoryId" = ${categoryId}::uuid ${this.prisma.$queryRawUnsafe(searchCondition)}
+          WHERE p."isActive" = true AND p."categoryId" = ${categoryId} ${searchCondition}
           ORDER BY RANDOM()
           LIMIT ${limit}
           OFFSET ${skip}
@@ -304,8 +336,8 @@ export class ProductsService {
         this.prisma.$queryRaw`
           SELECT COUNT(*) as count
           FROM "Product" p
-          WHERE p."isActive" = true AND p."categoryId" = ${categoryId}::uuid ${this.prisma.$queryRawUnsafe(searchCondition)}
-        `
+          WHERE p."isActive" = true AND p."categoryId" = ${categoryId} ${searchCondition}
+        `,
       ]);
 
       const total = Number((totalResult as any[])[0]?.count || 0);
@@ -383,8 +415,16 @@ export class ProductsService {
   /**
    * Busca produtos por termo de busca para o e-commerce
    */
-  async searchProducts(search: string, query: EcommerceProductsDto): Promise<PaginatedProductsResponseDto> {
-    const { categoryId, sortBy = SortOrder.RANDOM, page = 1, limit = 20 } = query;
+  async searchProducts(
+    search: string,
+    query: EcommerceProductsDto,
+  ): Promise<PaginatedProductsResponseDto> {
+    const {
+      categoryId,
+      sortBy = SortOrder.RANDOM,
+      page = 1,
+      limit = 20,
+    } = query;
     const skip = (page - 1) * limit;
 
     const searchCondition = this.buildAccentInsensitiveSearchCondition(search);
@@ -444,7 +484,9 @@ export class ProductsService {
   }
 
   private buildCategoryCondition(categoryId?: string): Prisma.Sql {
-    return categoryId ? Prisma.sql`AND p."categoryId" = ${categoryId}::uuid` : Prisma.empty;
+    return categoryId
+      ? Prisma.sql`AND p."categoryId" = ${categoryId}`
+      : Prisma.empty;
   }
 
   private getRawOrderByClause(sortBy: SortOrder): Prisma.Sql {
