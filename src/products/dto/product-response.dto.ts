@@ -14,6 +14,12 @@ export class CategoryResponseDto {
   name: string;
 
   @ApiProperty({
+    example: 1,
+    description: 'Posição de exibição da categoria',
+  })
+  sortOrder: number;
+
+  @ApiProperty({
     example: '2024-01-01T00:00:00.000Z',
     description: 'Data de criação da categoria',
   })
