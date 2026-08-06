@@ -222,102 +222,34 @@ export class ProductsService {
     const { categoryId, search, sortBy = SortOrder.RANDOM, page = 1, limit = 20 } = query;
     const skip = (page - 1) * limit;
 
-    // Se for ordenação aleatória, usar query raw
-    if (sortBy === SortOrder.RANDOM) {
-      let whereCondition = 'p."isActive" = true'; // Apenas produtos ativos
-      
-      if (categoryId) {
-        whereCondition += ` AND p."categoryId" = '${categoryId}'`;
-      }
+    const searchCondition = this.buildOptionalSearchCondition(search);
+    const categoryCondition = this.buildCategoryCondition(categoryId);
+    const orderByClause = this.getRawOrderByClause(sortBy);
 
-      if (search && search.trim() !== '') {
-        whereCondition += ` AND (LOWER(p.name) LIKE LOWER('%${search.trim()}%') OR LOWER(p.description) LIKE LOWER('%${search.trim()}%'))`;
-      }
-
-      const [products, totalResult] = await Promise.all([
-        this.prisma.$queryRawUnsafe(`
-          SELECT p.*, c.id as "categoryId", c.name as "categoryName", c.image as "categoryImage"
-          FROM "Product" p
-          LEFT JOIN "Category" c ON p."categoryId" = c.id
-          WHERE ${whereCondition}
-          ORDER BY RANDOM()
-          LIMIT ${limit}
-          OFFSET ${skip}
-        `),
-        this.prisma.$queryRawUnsafe(`
-          SELECT COUNT(*) as count
-          FROM "Product" p
-          WHERE ${whereCondition}
-        `)
-      ]);
-
-      const total = Number((totalResult as any[])[0]?.count || 0);
-      const totalPages = Math.ceil(total / limit);
-      const hasPreviousPage = page > 1;
-      const hasNextPage = page < totalPages;
-
-      return {
-        data: products as ProductResponseDto[],
-        total,
-        page,
-        limit,
-        totalPages,
-        hasPreviousPage,
-        hasNextPage,
-      };
-    }
-
-    // Construir condições de filtro para ordenação não-aleatória
-    const where: any = {
-      isActive: true, // Apenas produtos ativos
-    };
-
-    // Aplicar filtro de categoria apenas se fornecido
-    if (categoryId) {
-      where.categoryId = categoryId;
-    }
-
-    // Aplicar filtro de busca apenas se fornecido
-    if (search && search.trim() !== '') {
-      where.OR = [
-        {
-          name: {
-            contains: search.trim(),
-            mode: 'insensitive',
-          },
-        },
-        {
-          description: {
-            contains: search.trim(),
-            mode: 'insensitive',
-          },
-        },
-      ];
-    }
-
-    // Definir ordenação baseada no sortBy
-    const orderBy = this.getOrderBy(sortBy);
-
-    // Buscar produtos com filtros, paginação e ordenação
-    const [products, total] = await Promise.all([
-      this.prisma.product.findMany({
-        where,
-        include: {
-          category: true,
-        },
-        skip,
-        take: limit,
-        orderBy,
-      }),
-      this.prisma.product.count({ where }),
+    const [products, totalResult] = await Promise.all([
+      this.prisma.$queryRaw`
+        SELECT p.*, c.id as "categoryId", c.name as "categoryName", c.image as "categoryImage"
+        FROM "Product" p
+        LEFT JOIN "Category" c ON p."categoryId" = c.id
+        WHERE p."isActive" = true ${searchCondition} ${categoryCondition}
+        ORDER BY ${orderByClause}
+        LIMIT ${limit}
+        OFFSET ${skip}
+      `,
+      this.prisma.$queryRaw`
+        SELECT COUNT(*)::int as count
+        FROM "Product" p
+        WHERE p."isActive" = true ${searchCondition} ${categoryCondition}
+      `,
     ]);
 
+    const total = Number((totalResult as { count: number }[])[0]?.count || 0);
     const totalPages = Math.ceil(total / limit);
     const hasPreviousPage = page > 1;
     const hasNextPage = page < totalPages;
 
     return {
-      data: products,
+      data: products as ProductResponseDto[],
       total,
       page,
       limit,
@@ -490,6 +422,14 @@ export class ProductsService {
       hasPreviousPage,
       hasNextPage,
     };
+  }
+
+  private buildOptionalSearchCondition(search?: string): Prisma.Sql {
+    if (!search || search.trim() === '') {
+      return Prisma.empty;
+    }
+
+    return Prisma.sql`AND ${this.buildAccentInsensitiveSearchCondition(search)}`;
   }
 
   private buildAccentInsensitiveSearchCondition(search: string): Prisma.Sql {
