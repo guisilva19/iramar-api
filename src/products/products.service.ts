@@ -1,4 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { FindAllProductsDto } from './dto/find-all-products.dto';
@@ -10,6 +11,9 @@ import 'dotenv/config';
 
 @Injectable()
 export class ProductsService {
+  private readonly accentedChars = 'áàâãäéèêëíìîïóòôõöúùûüçñÁÀÂÃÄÉÈÊËÍÌÎÏÓÒÔÕÖÚÙÛÜÇÑ';
+  private readonly unaccentedChars = 'aaaaaeeeeiiiiooooouuuucnAAAAAEEEEIIIIOOOOOUUUUCN';
+
   private s3: S3Client;
 
   constructor(private prisma: PrismaService) {
@@ -232,7 +236,7 @@ export class ProductsService {
 
       const [products, totalResult] = await Promise.all([
         this.prisma.$queryRawUnsafe(`
-          SELECT p.*, c.id as "categoryId", c.name as "categoryName", c.description as "categoryDescription"
+          SELECT p.*, c.id as "categoryId", c.name as "categoryName", c.image as "categoryImage"
           FROM "Product" p
           LEFT JOIN "Category" c ON p."categoryId" = c.id
           WHERE ${whereCondition}
@@ -331,7 +335,7 @@ export class ProductsService {
 
     // Buscar produtos em destaque com ordenação aleatória
     const products = await this.prisma.$queryRaw`
-      SELECT p.*, c.id as "categoryId", c.name as "categoryName", c.description as "categoryDescription"
+      SELECT p.*, c.id as "categoryId", c.name as "categoryName", c.image as "categoryImage"
       FROM "Product" p
       LEFT JOIN "Category" c ON p."categoryId" = c.id
       WHERE p."isActive" = true ${categoryId ? `AND p."categoryId" = ${categoryId}::uuid` : ''}
@@ -357,7 +361,7 @@ export class ProductsService {
 
       const [products, totalResult] = await Promise.all([
         this.prisma.$queryRaw`
-          SELECT p.*, c.id as "categoryId", c.name as "categoryName", c.description as "categoryDescription"
+          SELECT p.*, c.id as "categoryId", c.name as "categoryName", c.image as "categoryImage"
           FROM "Product" p
           LEFT JOIN "Category" c ON p."categoryId" = c.id
           WHERE p."isActive" = true AND p."categoryId" = ${categoryId}::uuid ${this.prisma.$queryRawUnsafe(searchCondition)}
@@ -451,90 +455,34 @@ export class ProductsService {
     const { categoryId, sortBy = SortOrder.RANDOM, page = 1, limit = 20 } = query;
     const skip = (page - 1) * limit;
 
-    // Se for ordenação aleatória, usar query raw
-    if (sortBy === SortOrder.RANDOM) {
-      const categoryCondition = categoryId ? `AND p."categoryId" = '${categoryId}'` : '';
+    const searchCondition = this.buildAccentInsensitiveSearchCondition(search);
+    const categoryCondition = this.buildCategoryCondition(categoryId);
+    const orderByClause = this.getRawOrderByClause(sortBy);
 
-      const [products, totalResult] = await Promise.all([
-        this.prisma.$queryRaw`
-          SELECT p.*, c.id as "categoryId", c.name as "categoryName", c.description as "categoryDescription"
-          FROM "Product" p
-          LEFT JOIN "Category" c ON p."categoryId" = c.id
-          WHERE p."isActive" = true AND (LOWER(p.name) LIKE LOWER('%${search.trim()}%') OR LOWER(p.description) LIKE LOWER('%${search.trim()}%')) ${this.prisma.$queryRawUnsafe(categoryCondition)}
-          ORDER BY RANDOM()
-          LIMIT ${limit}
-          OFFSET ${skip}
-        `,
-        this.prisma.$queryRaw`
-          SELECT COUNT(*) as count
-          FROM "Product" p
-          WHERE p."isActive" = true AND (LOWER(p.name) LIKE LOWER('%${search.trim()}%') OR LOWER(p.description) LIKE LOWER('%${search.trim()}%')) ${this.prisma.$queryRawUnsafe(categoryCondition)}
-        `
-      ]);
-
-      const total = Number((totalResult as any[])[0]?.count || 0);
-      const totalPages = Math.ceil(total / limit);
-      const hasPreviousPage = page > 1;
-      const hasNextPage = page < totalPages;
-
-      return {
-        data: products as ProductResponseDto[],
-        total,
-        page,
-        limit,
-        totalPages,
-        hasPreviousPage,
-        hasNextPage,
-      };
-    }
-
-    // Construir condições de filtro para ordenação não-aleatória
-    const where: any = {
-      isActive: true, // Apenas produtos ativos
-      OR: [
-        {
-          name: {
-            contains: search.trim(),
-            mode: 'insensitive',
-          },
-        },
-        {
-          description: {
-            contains: search.trim(),
-            mode: 'insensitive',
-          },
-        },
-      ],
-    };
-
-    // Aplicar filtro de categoria apenas se fornecido
-    if (categoryId) {
-      where.categoryId = categoryId;
-    }
-
-    // Definir ordenação baseada no sortBy
-    const orderBy = this.getOrderBy(sortBy);
-
-    // Buscar produtos com busca, filtros, paginação e ordenação
-    const [products, total] = await Promise.all([
-      this.prisma.product.findMany({
-        where,
-        include: {
-          category: true,
-        },
-        skip,
-        take: limit,
-        orderBy,
-      }),
-      this.prisma.product.count({ where }),
+    const [products, totalResult] = await Promise.all([
+      this.prisma.$queryRaw`
+        SELECT p.*, c.id as "categoryId", c.name as "categoryName", c.image as "categoryImage"
+        FROM "Product" p
+        LEFT JOIN "Category" c ON p."categoryId" = c.id
+        WHERE p."isActive" = true AND ${searchCondition} ${categoryCondition}
+        ORDER BY ${orderByClause}
+        LIMIT ${limit}
+        OFFSET ${skip}
+      `,
+      this.prisma.$queryRaw`
+        SELECT COUNT(*)::int as count
+        FROM "Product" p
+        WHERE p."isActive" = true AND ${searchCondition} ${categoryCondition}
+      `,
     ]);
 
+    const total = Number((totalResult as { count: number }[])[0]?.count || 0);
     const totalPages = Math.ceil(total / limit);
     const hasPreviousPage = page > 1;
     const hasNextPage = page < totalPages;
 
     return {
-      data: products,
+      data: products as ProductResponseDto[],
       total,
       page,
       limit,
@@ -542,6 +490,42 @@ export class ProductsService {
       hasPreviousPage,
       hasNextPage,
     };
+  }
+
+  private buildAccentInsensitiveSearchCondition(search: string): Prisma.Sql {
+    const searchPattern = `%${search.trim()}%`;
+
+    return Prisma.sql`(
+      LOWER(TRANSLATE(p.name, ${this.accentedChars}, ${this.unaccentedChars}))
+        LIKE LOWER(TRANSLATE(${searchPattern}, ${this.accentedChars}, ${this.unaccentedChars}))
+      OR LOWER(TRANSLATE(p.description, ${this.accentedChars}, ${this.unaccentedChars}))
+        LIKE LOWER(TRANSLATE(${searchPattern}, ${this.accentedChars}, ${this.unaccentedChars}))
+    )`;
+  }
+
+  private buildCategoryCondition(categoryId?: string): Prisma.Sql {
+    return categoryId ? Prisma.sql`AND p."categoryId" = ${categoryId}::uuid` : Prisma.empty;
+  }
+
+  private getRawOrderByClause(sortBy: SortOrder): Prisma.Sql {
+    switch (sortBy) {
+      case SortOrder.NEWEST:
+        return Prisma.sql`p."createdAt" DESC`;
+      case SortOrder.OLDEST:
+        return Prisma.sql`p."createdAt" ASC`;
+      case SortOrder.PRICE_LOW:
+        return Prisma.sql`p.price ASC`;
+      case SortOrder.PRICE_HIGH:
+        return Prisma.sql`p.price DESC`;
+      case SortOrder.NAME_ASC:
+        return Prisma.sql`p.name ASC`;
+      case SortOrder.NAME_DESC:
+        return Prisma.sql`p.name DESC`;
+      case SortOrder.RANDOM:
+        return Prisma.sql`RANDOM()`;
+      default:
+        return Prisma.sql`p."createdAt" DESC`;
+    }
   }
 
   /**
